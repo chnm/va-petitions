@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1 class="text-3xl font-bold mb-4">Virginia Petitions</h1>
+<p class="mb-4 max-w-prose">
+    Explore <span class="font-mono font-medium">{{ petition_count }}</span> digitized
+    and transcribed petitions from the Library of Virginia, spanning
+    <span class="font-mono font-medium">{{ county_count }}</span> counties and
+    <span class="font-mono font-medium">{{ subject_count }}</span> subjects.
+</p>
+<p class="mb-4 max-w-prose text-gray-600">
+    Petitions to the General Assembly were the primary catalyst for legislation
+    in the Commonwealth from 1776 until 1865. Public improvements, military
+    claims, divorce, manumission of enslaved people, division of counties,
+    incorporation of towns, religious freedom, and taxation were just some of
+    the concerns expressed in these petitions.
+</p>
+<div class="flex gap-4 mt-6">
+    <a href="{% url 'petitions:map' %}" class="text-red-800 hover:underline font-medium">Browse by map</a>
+    <a href="{% url 'petitions:petition_list' %}" class="text-red-800 hover:underline font-medium">Browse all petitions</a>
+    <a href="{% url 'petitions:county_list' %}" class="text-red-800 hover:underline font-medium">Browse by county</a>
+</div>
+{% endblock %}

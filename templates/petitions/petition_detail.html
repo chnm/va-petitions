@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}{{ petition.title }} - Virginia Petitions{% endblock %}
+
+{% block content %}
+<h1 class="text-3xl font-bold mb-6">{{ petition.title }}</h1>
+
+<dl class="grid grid-cols-[auto_1fr] gap-x-6 gap-y-3 mb-8 text-sm">
+    <dt class="font-semibold text-gray-500">Date</dt>
+    <dd class="font-mono">{{ petition.date|default:"Unknown" }}</dd>
+
+    <dt class="font-semibold text-gray-500">Type</dt>
+    <dd>{{ petition.get_petition_type_display }}</dd>
+
+    <dt class="font-semibold text-gray-500">Original locality</dt>
+    <dd>{{ petition.locality_raw|default:"Unknown" }}</dd>
+
+    <dt class="font-semibold text-gray-500">Counties (modern)</dt>
+    <dd>
+        {% for county in petition.counties.all %}
+            <a href="{% url 'petitions:county_detail' county.slug %}" class="text-red-800 hover:underline">{{ county }}</a>{% if not forloop.last %}, {% endif %}
+        {% empty %}
+            <span class="text-gray-400">None assigned</span>
+        {% endfor %}
+    </dd>
+
+    <dt class="font-semibold text-gray-500">Subjects</dt>
+    <dd>
+        {% for subject in petition.subjects.all %}
+            {{ subject.name }}{% if not forloop.last %}, {% endif %}
+        {% empty %}
+            <span class="text-gray-400">None</span>
+        {% endfor %}
+    </dd>
+
+    <dt class="font-semibold text-gray-500">Serial</dt>
+    <dd class="font-mono">{{ petition.serial }}</dd>
+</dl>
+
+<h2 class="text-xl font-semibold mb-2">Description</h2>
+<p class="max-w-prose text-gray-600 mb-6">{{ petition.description }}</p>
+
+<div class="flex gap-4 text-sm">
+    {% if petition.rosetta_url %}
+    <a href="{{ petition.rosetta_url }}" target="_blank" class="text-red-800 hover:underline font-medium">View digitized petition &rarr;</a>
+    {% endif %}
+    {% if petition.permalink %}
+    <a href="{{ petition.permalink }}" target="_blank" class="text-red-800 hover:underline font-medium">Catalog permalink &rarr;</a>
+    {% endif %}
+</div>
+{% endblock %}

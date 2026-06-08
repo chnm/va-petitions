@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}Petitions - Virginia Petitions{% endblock %}
+
+{% block content %}
+<h1 class="text-3xl font-bold mb-4">Petitions</h1>
+
+<form method="get" class="flex flex-wrap gap-4 items-center mb-6">
+    <div>
+        <label for="type" class="text-sm text-gray-600 mr-1">Type:</label>
+        <select name="type" id="type" onchange="this.form.submit()"
+                class="border border-gray-300 rounded px-2 py-1 text-sm bg-white">
+            <option value="">All</option>
+            <option value="legislative" {% if current_type == "legislative" %}selected{% endif %}>Legislative</option>
+            <option value="pension" {% if current_type == "pension" %}selected{% endif %}>Revolutionary War Pension</option>
+        </select>
+    </div>
+
+    <div>
+        <label for="subject" class="text-sm text-gray-600 mr-1">Subject:</label>
+        <select name="subject" id="subject" onchange="this.form.submit()"
+                class="border border-gray-300 rounded px-2 py-1 text-sm bg-white">
+            <option value="">All</option>
+            {% for subject in subjects %}
+            <option value="{{ subject.slug }}" {% if current_subject == subject.slug %}selected{% endif %}>
+                {{ subject.name }} ({{ subject.count }})
+            </option>
+            {% endfor %}
+        </select>
+    </div>
+</form>
+
+<p class="text-sm text-gray-500 mb-4">
+    <span class="font-mono">{{ petitions.count }}</span> petition{{ petitions.count|pluralize }}
+</p>
+
+<table class="w-full text-sm">
+    <thead>
+        <tr class="border-b-2 border-gray-800 text-left">
+            <th class="py-2 pr-4">Title</th>
+            <th class="py-2 pr-4 w-28">Date</th>
+            <th class="py-2 pr-4 w-40">Type</th>
+            <th class="py-2 w-40">Locality</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for petition in petitions %}
+        <tr class="border-b border-gray-200 hover:bg-gray-100 transition-colors">
+            <td class="py-2 pr-4">
+                <a href="{% url 'petitions:petition_detail' petition.serial %}" class="text-red-800 hover:underline">{{ petition.title }}</a>
+            </td>
+            <td class="py-2 pr-4 font-mono text-gray-600">{{ petition.date|default:"—" }}</td>
+            <td class="py-2 pr-4 text-gray-600">{{ petition.get_petition_type_display }}</td>
+            <td class="py-2 text-gray-600">{{ petition.locality_raw|default:"Unknown" }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

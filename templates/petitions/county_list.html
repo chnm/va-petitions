@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}Counties - Virginia Petitions{% endblock %}
+
+{% block content %}
+<h1 class="text-3xl font-bold mb-4">Counties</h1>
+
+<form method="get" class="mb-6">
+    <label for="state" class="text-sm text-gray-600 mr-1">State:</label>
+    <select name="state" id="state" onchange="this.form.submit()"
+            class="border border-gray-300 rounded px-2 py-1 text-sm bg-white">
+        <option value="">All</option>
+        <option value="VA" {% if current_state == "VA" %}selected{% endif %}>Virginia</option>
+        <option value="WV" {% if current_state == "WV" %}selected{% endif %}>West Virginia</option>
+        <option value="KY" {% if current_state == "KY" %}selected{% endif %}>Kentucky</option>
+        <option value="PA" {% if current_state == "PA" %}selected{% endif %}>Pennsylvania</option>
+    </select>
+</form>
+
+<ul class="columns-2 md:columns-3 gap-6 text-sm">
+    {% for county in counties %}
+    <li class="mb-1">
+        <a href="{% url 'petitions:county_detail' county.slug %}" class="text-red-800 hover:underline">{{ county }}</a>
+        <span class="text-gray-400 font-mono text-xs">({{ county.petition_count }})</span>
+    </li>
+    {% endfor %}
+</ul>
+{% endblock %}

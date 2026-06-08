@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block title %}Map - Virginia Petitions{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+    #map { height: 600px; width: 100%; }
+    .count-label {
+        background: none;
+        border: none;
+        box-shadow: none;
+        font-size: 10px;
+        font-weight: bold;
+        color: #333;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<h1 class="text-3xl font-bold mb-4">Browse by Map</h1>
+<div class="flex flex-wrap gap-4 items-center mb-2 text-sm">
+    <label class="flex items-center gap-1.5 cursor-pointer">
+        <input type="checkbox" id="toggle-boundaries" class="rounded">
+        Historical county boundaries
+    </label>
+    <label for="year-slider" class="text-gray-600">
+        Year: <span id="boundary-year" class="font-mono font-medium text-gray-800">1800</span>
+    </label>
+    <input type="range" id="year-slider" min="1773" max="1861" value="1800" step="1" disabled
+           class="w-48 accent-red-800 disabled:opacity-40">
+</div>
+<div id="map" class="rounded border border-gray-200"></div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    const map = L.map('map').setView([37.5, -79.5], 7);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/">CARTO</a>',
+        subdomains: 'abcd',
+        maxZoom: 19
+    }).addTo(map);
+
+    const counties = [
+        {% for county in counties %}
+        {
+            name: "{{ county.name }}, {{ county.get_state_display }}",
+            lat: {{ county.latitude }},
+            lng: {{ county.longitude }},
+            count: {{ county.petition_count }},
+            url: "{% url 'petitions:county_detail' county.slug %}"
+        },
+        {% endfor %}
+    ];
+
+    const markerLayer = L.layerGroup().addTo(map);
+    const labelLayer = L.layerGroup();
+
+    counties.forEach(function(c) {
+        const marker = L.circleMarker([c.lat, c.lng], {
+            radius: Math.min(3 + Math.log2(c.count + 1) * 2, 12),
+            fillColor: '#e74c3c',
+            color: '#c0392b',
+            weight: 1,
+            fillOpacity: 0.6
+        }).addTo(markerLayer);
+        marker.bindPopup(
+            '<strong><a href="' + c.url + '">' + c.name + '</a></strong><br>' +
+            c.count + ' petition' + (c.count !== 1 ? 's' : '')
+        );
+
+        const label = L.tooltip({
+            permanent: true,
+            direction: 'center',
+            className: 'count-label'
+        }).setContent(String(c.count)).setLatLng([c.lat, c.lng]);
+        labelLayer.addLayer(label);
+    });
+
+    L.control.layers(null, {
+        'Petition counts': labelLayer
+    }, { collapsed: false }).addTo(map);
+
+    // Historical county boundaries
+    const boundaryLayer = L.layerGroup();
+    const toggleCheckbox = document.getElementById('toggle-boundaries');
+    const yearSlider = document.getElementById('year-slider');
+    const yearLabel = document.getElementById('boundary-year');
+    let fetchTimeout = null;
+
+    function formatDate(year) {
+        return year + '-01-01';
+    }
+
+    function fetchBoundaries(year) {
+        const dateStr = formatDate(year);
+        const url = 'https://data.chnm.org/ahcb/counties/' + dateStr + '/state-code/va,wv,ky,pa/';
+
+        fetch(url)
+            .then(function(resp) { return resp.json(); })
+            .then(function(geojson) {
+                boundaryLayer.clearLayers();
+                L.geoJSON(geojson, {
+                    style: {
+                        color: '#2c3e50',
+                        weight: 1.5,
+                        fillColor: '#3498db',
+                        fillOpacity: 0.08
+                    },
+                    onEachFeature: function(feature, layer) {
+                        const props = feature.properties;
+                        layer.bindPopup(
+                            '<strong>' + props.name + '</strong><br>' +
+                            props.state_terr + ' (' + year + ')'
+                        );
+                    }
+                }).addTo(boundaryLayer);
+            });
+    }
+
+    toggleCheckbox.addEventListener('change', function() {
+        if (this.checked) {
+            yearSlider.disabled = false;
+            boundaryLayer.addTo(map);
+            fetchBoundaries(parseInt(yearSlider.value));
+        } else {
+            yearSlider.disabled = true;
+            map.removeLayer(boundaryLayer);
+        }
+    });
+
+    yearSlider.addEventListener('input', function() {
+        yearLabel.textContent = this.value;
+        clearTimeout(fetchTimeout);
+        fetchTimeout = setTimeout(function() {
+            fetchBoundaries(parseInt(yearSlider.value));
+        }, 300);
+    });
+</script>
+{% endblock %}
