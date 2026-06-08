@@ -1,0 +1,7 @@
+db.sqlite3
+.venv/
+__pycache__/
+*.pyc
+.DS_Store
+*.egg-info/
+theme/static_src/tailwindcss

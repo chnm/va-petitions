@@ -1,0 +1,11 @@
+[project]
+name = "va-petitions"
+version = "0.1.0"
+description = "Add your description here"
+requires-python = ">=3.13"
+dependencies = [
+    "cookiecutter>=2.7.1",
+    "django>=6.0.6",
+    "django-tailwind>=4.4.2",
+    "geopy>=2.4.1",
+]
