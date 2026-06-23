@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}{{ essay.title }} &mdash; By Petition{% endblock %}
+
+{% block content %}
+{% if essay %}
+<article class="max-w-[680px] mx-auto px-6 pt-16 pb-20">
+
+    {# Header #}
+    <header class="text-center mb-16">
+        {% if essay.kicker %}
+        <div class="font-mono text-[12px] tracking-[0.22em] uppercase text-accent mb-9">{{ essay.kicker }}</div>
+        {% endif %}
+        <h1 class="font-display text-[64px] leading-[1.04] text-ink mb-8">{{ essay.title }}</h1>
+        {% if essay.deck %}
+        <p class="font-serif italic text-[24px] leading-[1.42] text-ink-soft max-w-[560px] mx-auto">{{ essay.deck }}</p>
+        {% endif %}
+        {% if essay.author_name %}
+        <div class="mt-10">
+            <div class="font-mono text-[12px] tracking-[0.18em] uppercase text-ink-soft">By {{ essay.author_name }}</div>
+            {% if essay.author_title %}
+            <div class="font-serif italic text-[15px] text-meta mt-[6px]">{{ essay.author_title }}</div>
+            {% endif %}
+        </div>
+        {% endif %}
+        <div class="w-12 h-px bg-ink/35 mx-auto mt-11"></div>
+    </header>
+
+    {# Body #}
+    <div class="essay-body">
+        {{ essay.body_html }}
+    </div>
+
+</article>
+
+{# About the author #}
+{% if essay.author_bio %}
+<section class="border-t border-rule">
+    <div class="max-w-[680px] mx-auto px-6 py-14 flex gap-8 items-start">
+        <div class="shrink-0 w-[76px] h-[76px] rounded-full bg-paper-deep-2 flex items-center justify-center font-display text-[28px] text-meta">{{ essay.author_name|cut:"["|cut:"]"|first|default:"A" }}</div>
+        <div>
+            <div class="font-mono text-[12px] tracking-[0.2em] uppercase text-meta mb-3">About the Author</div>
+            <div class="font-display text-[25px] text-ink mb-2">{{ essay.author_name|default:"Author" }}</div>
+            <p class="font-serif text-[17px] leading-[1.6] text-ink-soft max-w-[560px]">{{ essay.author_bio }}</p>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+{% else %}
+<div class="max-w-[680px] mx-auto px-6 py-24 text-center">
+    <p class="font-serif text-[19px] text-ink-soft">The introduction essay has not been published yet.</p>
+</div>
+{% endif %}
+{% endblock %}

@@ -33,3 +33,156 @@
     background: #7c3a2d;
     color: #f3ede1;
 }
+
+/* ---- Dual-handle year range slider (Map filter bar) ---- */
+.dual-range {
+    -webkit-appearance: none;
+    appearance: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 24px;
+    margin: 0;
+    background: transparent;
+    pointer-events: none; /* track ignores clicks; thumbs re-enable below */
+}
+
+.dual-range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    pointer-events: auto;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--color-field);
+    border: 1.5px solid var(--color-accent);
+    cursor: pointer;
+    margin-top: 4px; /* center on the 24px-tall input */
+}
+
+.dual-range::-moz-range-thumb {
+    pointer-events: auto;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--color-field);
+    border: 1.5px solid var(--color-accent);
+    cursor: pointer;
+}
+
+.dual-range::-webkit-slider-runnable-track {
+    background: transparent;
+    border: none;
+}
+
+.dual-range::-moz-range-track {
+    background: transparent;
+    border: none;
+}
+
+/* ---- Essay body (Markdown-rendered prose on the Introduction page) ---- */
+.essay-body {
+    font-family: var(--font-serif);
+    color: var(--color-ink);
+    font-size: 21px;
+    line-height: 1.7;
+}
+
+.essay-body p {
+    margin: 0 0 1.5em;
+}
+
+/* Oxblood drop cap on the opening paragraph */
+.essay-body > p:first-of-type::first-letter {
+    float: left;
+    font-family: var(--font-display);
+    font-size: 5.1em;
+    line-height: 0.78;
+    color: var(--color-accent);
+    margin: 0.02em 0.09em -0.02em 0;
+}
+
+.essay-body h2 {
+    font-family: var(--font-serif);
+    font-weight: 400;
+    font-size: 30px;
+    line-height: 1.2;
+    color: var(--color-ink);
+    margin: 2.2em 0 0.55em;
+}
+
+/* Pull quotes (Markdown blockquotes) */
+.essay-body blockquote {
+    margin: 1.9em 0;
+    padding-left: 1.4em;
+    border-left: 3px solid var(--color-accent);
+    font-style: italic;
+    font-size: 26px;
+    line-height: 1.36;
+    color: var(--color-ink-soft-2);
+}
+
+.essay-body blockquote p {
+    margin: 0;
+}
+
+.essay-body a {
+    color: var(--color-accent);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    text-decoration-thickness: 1px;
+}
+
+/* Footnote references in the running text */
+.essay-body sup a.footnote-ref {
+    text-decoration: none;
+    font-size: 0.62em;
+    color: var(--color-accent);
+    padding-left: 1px;
+}
+
+/* The NOTES section auto-generated from footnotes */
+.essay-body .footnote {
+    margin-top: 3.2em;
+    padding-top: 2em;
+    border-top: 1px solid var(--color-rule);
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--color-ink-soft);
+}
+
+.essay-body .footnote hr {
+    display: none;
+}
+
+.essay-body .footnote::before {
+    content: "Notes";
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--color-meta);
+    margin-bottom: 1.4em;
+}
+
+.essay-body .footnote ol {
+    list-style: decimal;
+    padding-left: 1.6em;
+    margin: 0;
+}
+
+.essay-body .footnote li {
+    margin-bottom: 0.5em;
+    padding-left: 0.3em;
+}
+
+.essay-body .footnote li::marker {
+    color: var(--color-meta);
+}
+
+/* Hide the auto-generated "return to text" arrow to match the print-style design */
+.essay-body .footnote a.footnote-backref {
+    display: none;
+}

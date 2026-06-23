@@ -3,6 +3,23 @@ from django.shortcuts import render
 
 from petitions.models import County, Petition, Subject
 
+from .models import Essay, Resource, ResourcePage
+
+
+def introduction(request):
+    return render(request, 'pages/introduction.html', {
+        'essay': Essay.objects.first(),
+        'nav_active': 'introduction',
+    })
+
+
+def resources(request):
+    return render(request, 'pages/resources.html', {
+        'page': ResourcePage.objects.first(),
+        'resources': Resource.objects.filter(is_published=True),
+        'nav_active': 'resources',
+    })
+
 
 def home(request):
     return render(request, 'pages/home.html', {
