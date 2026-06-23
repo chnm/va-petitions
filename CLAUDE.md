@@ -78,6 +78,7 @@ The map view (`/map/`) uses Leaflet with CARTO tiles. A filter bar above the map
 
 ## Style Conventions
 
+- Admin uses **django-unfold**; new `ModelAdmin` classes must inherit `unfold.admin.ModelAdmin` (not the plain Django base). `unfold` + `unfold.contrib.import_export` precede `django.contrib.admin` in `INSTALLED_APPS`; `PetitionAdmin` uses Unfold's import/export forms.
 - Do not commit the source CSV or `statement.md` (kept untracked)
 - Group git commits logically by concern
 - `::selection` styled with oxblood accent (#7c3a2d on #f3ede1)
