@@ -1,12 +1,12 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}The Catalogue — By Petition{% endblock %}
+{% block title %}The Catalog — By Petition{% endblock %}
 
 {% block content %}
 <div class="max-w-[1280px] mx-auto pt-[54px] px-14 pb-7">
     <div class="font-mono text-[12px] tracking-[0.3em] uppercase text-accent mb-[18px]">Petitions &middot; 1773 &ndash; 1861</div>
-    <h1 class="font-display font-normal text-[52px] leading-[1.05] m-0 tracking-[-0.01em]">The Catalogue</h1>
+    <h1 class="font-display font-normal text-[52px] leading-[1.05] m-0 tracking-[-0.01em]">The Catalog</h1>
     <p class="text-[18px] leading-[1.6] text-ink-soft max-w-[640px] mt-[18px]" style="text-wrap:pretty">Browse the full collection of petitions and pension declarations. Filter by type, subject, or locality; sort by date or petitioner; follow any record to its original at Virginia Memory.</p>
 </div>
 
@@ -16,13 +16,13 @@
     <div>
         <div class="flex justify-between items-baseline border-b border-ink pb-[10px] mb-[18px]">
             <span class="font-mono text-[11px] tracking-[0.2em] uppercase text-ink">Refine</span>
-            <a href="{% url 'petitions:catalogue' %}" class="font-mono text-[10.5px] tracking-[0.12em] uppercase text-accent">Clear</a>
+            <a href="{% url 'petitions:catalog' %}" class="font-mono text-[10.5px] tracking-[0.12em] uppercase text-accent">Clear</a>
         </div>
 
         {# Type facets #}
         <div class="font-mono text-[11px] tracking-[0.18em] uppercase text-meta mb-[6px]">Type</div>
         {% with total=type_counts.legislative|default:0|add:type_counts.pension|default:0 %}
-        <a href="{% url 'petitions:catalogue' %}{% if current_subject %}?subject={{ current_subject }}{% endif %}{% if current_loc %}&loc={{ current_loc }}{% endif %}"
+        <a href="{% url 'petitions:catalog' %}{% if current_subject %}?subject={{ current_subject }}{% endif %}{% if current_loc %}&loc={{ current_loc }}{% endif %}"
            class="flex justify-between w-full py-[7px] font-mono text-[12px] tracking-[0.03em] hover:text-ink {% if not current_type %}text-ink font-bold{% else %}text-meta{% endif %}">
             <span>All types</span><span>{{ total_count }}</span>
         </a>

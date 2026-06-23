@@ -21,7 +21,7 @@ uv run python manage.py geocode_counties [--overwrite]         # Populate county
 ## Architecture
 
 - **`config/`** — Django project settings, root URL conf (`config/urls.py` includes both `petitions.urls` and `pages.urls` at root).
-- **`petitions/`** — Core app. Models: `Petition` (with `kind`, `primary_theme` fields), `County` (with state: VA/WV/KY/PA), `Subject`. Petitions connect to counties and subjects via M2M. Views: catalogue (server-side paginated), map (Leaflet + AJAX detail panel), search (server-side), petition detail, county list/detail.
+- **`petitions/`** — Core app. Models: `Petition` (with `kind`, `primary_theme` fields), `County` (with state: VA/WV/KY/PA), `Subject`. Petitions connect to counties and subjects via M2M. Views: catalog (server-side paginated), map (Leaflet + AJAX detail panel), search (server-side), petition detail, county list/detail.
 - **`pages/`** — Home, about, and two model-backed content pages: Introduction essay (`Essay`) and Educational Resources (`ResourcePage` + `Resource` cards). `Essay`/`ResourcePage` are admin-edited singletons (`has_add_permission` guard); their Markdown body fields render via the `markdown` lib.
 - **`theme/`** — django-tailwind app (v4 standalone, no Node required). Source CSS in `theme/static_src/src/styles.css`. Built CSS output in `theme/static/css/dist/styles.css`.
 - **`templates/`** — Project-level templates. `base.html` includes masthead, footer, and loads Tailwind + Google Fonts.
@@ -31,7 +31,7 @@ uv run python manage.py geocode_counties [--overwrite]         # Populate county
 
 - `/` — Home ("Laid Before the Assembly")
 - `/introduction/` — Interpretive essay (singleton `Essay`, Markdown body with footnotes → Notes, pull quotes)
-- `/catalogue/` — Paginated catalogue with type/subject/locality filters
+- `/catalog/` — Paginated catalog with type/subject/locality filters
 - `/map/` — Leaflet map with county markers, ranked panel, subject + year-range filter bar, AHCB boundary toggle
 - `/map/county/<slug>/` — AJAX endpoint returning petitions for a county (JSON); honors `?subject=&from=&to=` filters
 - `/search/?q=` — Server-side search across title, description, locality, subjects

@@ -16,7 +16,7 @@
     <div>
         <div class="flex justify-between items-baseline mt-6 mb-1">
             <span class="font-mono text-[12px] tracking-[0.12em] uppercase text-ink">{{ results|length }} result(s)</span>
-            <a href="{% url 'petitions:catalogue' %}" class="font-mono text-[11px] tracking-[0.1em] uppercase text-accent">Open in the Catalogue &rarr;</a>
+            <a href="{% url 'petitions:catalog' %}" class="font-mono text-[11px] tracking-[0.1em] uppercase text-accent">Open in the Catalog &rarr;</a>
         </div>
 
         {% for petition in results %}
@@ -51,7 +51,7 @@
             <a href="?q={{ term }}" class="cursor-pointer font-mono text-[12px] tracking-[0.06em] py-[9px] px-4 border border-border bg-field text-ink-soft hover:bg-ink hover:text-paper hover:border-ink">{{ term }}</a>
             {% endfor %}
         </div>
-        <p class="text-[17px] leading-[1.6] text-ink-soft mt-[34px] max-w-[560px]" style="text-wrap:pretty">Search runs across petitioners, localities, subjects, and descriptions &mdash; or <a href="{% url 'petitions:catalogue' %}" class="text-accent border-b border-accent-border">browse the full collection in the Catalogue</a>.</p>
+        <p class="text-[17px] leading-[1.6] text-ink-soft mt-[34px] max-w-[560px]" style="text-wrap:pretty">Search runs across petitioners, localities, subjects, and descriptions &mdash; or <a href="{% url 'petitions:catalog' %}" class="text-accent border-b border-accent-border">browse the full collection in the Catalog</a>.</p>
     </div>
     {% endif %}
 </div>

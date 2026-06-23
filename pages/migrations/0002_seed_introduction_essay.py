@@ -13,7 +13,7 @@ To read these documents in bulk is to hear a young republic working out who belo
 
 Enslaved Virginians appear throughout these pages, almost never as authors and almost always as subjects: counted as property in claims for compensation, named in contests over wills, invoked in protests against manumission. Their presence in a record built to exclude them is one of the collection's most difficult and necessary lessons.[^2]
 
-What follows — the catalogue, the map, the search — is an invitation to listen closely to a chorus of ordinary people who believed, with reason and sometimes against it, that the state was theirs to address.
+What follows — the catalog, the map, the search — is an invitation to listen closely to a chorus of ordinary people who believed, with reason and sometimes against it, that the state was theirs to address.
 
 [^1]: [Citation to be supplied by the author.]
 

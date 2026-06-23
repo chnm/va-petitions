@@ -11,7 +11,7 @@ THEME_LABELS = dict(Petition.THEME_CHOICES)
 PER_PAGE = 50
 
 
-def catalogue(request):
+def catalog(request):
     qs = Petition.objects.all().prefetch_related('subjects')
     total_count = qs.count()
 
@@ -60,8 +60,8 @@ def catalogue(request):
     query_params.pop('page', None)
     query_string = query_params.urlencode()
 
-    return render(request, 'petitions/catalogue.html', {
-        'nav_active': 'catalogue',
+    return render(request, 'petitions/catalog.html', {
+        'nav_active': 'catalog',
         'page': page,
         'total_count': total_count,
         'filtered_count': paginator.count,
@@ -95,7 +95,7 @@ def map_view(request):
     } for c in counties]
     county_index = {c.slug: i for i, c in enumerate(counties)}
 
-    # Subjects for the dropdown, with overall counts (like the catalogue).
+    # Subjects for the dropdown, with overall counts (like the catalog).
     subjects = Subject.objects.annotate(
         c=Count('petitions')
     ).filter(c__gt=0).order_by('name')
