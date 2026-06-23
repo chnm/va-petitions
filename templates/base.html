@@ -26,7 +26,7 @@
         </a>
         <nav class="flex gap-8 font-mono text-[12px] tracking-[0.12em] uppercase text-ink-soft">
             <a class="hover:text-accent{% if nav_active == 'introduction' %} text-ink border-b border-accent pb-[3px]{% endif %}" href="{% url 'pages:introduction' %}">Introduction</a>
-            <a class="hover:text-accent{% if nav_active == 'catalog' %} text-ink border-b border-accent pb-[3px]{% endif %}" href="{% url 'petitions:catalog' %}">The Catalog</a>
+            <a class="hover:text-accent{% if nav_active == 'catalog' %} text-ink border-b border-accent pb-[3px]{% endif %}" href="{% url 'petitions:catalog' %}">Catalog</a>
             <a class="hover:text-accent{% if nav_active == 'map' %} text-ink border-b border-accent pb-[3px]{% endif %}" href="{% url 'petitions:map' %}">Map</a>
             <a class="hover:text-accent{% if nav_active == 'search' %} text-ink border-b border-accent pb-[3px]{% endif %}" href="{% url 'petitions:search' %}">Search</a>
             <a class="hover:text-accent{% if nav_active == 'resources' %} text-ink border-b border-accent pb-[3px]{% endif %}" href="{% url 'pages:resources' %}">Resources</a>
