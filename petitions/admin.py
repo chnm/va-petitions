@@ -1,6 +1,8 @@
 from django.contrib import admin
+from import_export.admin import ImportExportModelAdmin
 
 from .models import County, Petition, Subject
+from .resources import PetitionResource
 
 
 @admin.register(County)
@@ -25,7 +27,8 @@ class SubjectAdmin(admin.ModelAdmin):
 
 
 @admin.register(Petition)
-class PetitionAdmin(admin.ModelAdmin):
+class PetitionAdmin(ImportExportModelAdmin):
+    resource_classes = [PetitionResource]
     list_display = ['serial', 'title', 'petition_type', 'kind', 'primary_theme', 'date', 'locality_raw']
     list_filter = ['petition_type', 'kind', 'primary_theme', 'subjects']
     list_editable = ['kind', 'primary_theme']

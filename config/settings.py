@@ -37,11 +37,16 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'import_export',
     'tailwind',
     'theme',
     'petitions',
     'pages',
 ]
+
+# Wrap imports in a transaction so the dry-run preview rolls back cleanly
+# (and a failed real import leaves no partial data).
+IMPORT_EXPORT_USE_TRANSACTIONS = True
 
 TAILWIND_APP_NAME = 'theme'
 

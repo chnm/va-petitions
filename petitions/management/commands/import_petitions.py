@@ -1,9 +1,9 @@
 import csv
-from datetime import date
 
 from django.core.management.base import BaseCommand
 from django.utils.text import slugify
 
+from petitions import lva
 from petitions.models import County, Petition, Subject
 
 # Column index ranges (from the CSV header)
@@ -13,11 +13,6 @@ SUBJECT_START = 158
 SUBJECT_END = 198  # exclusive; includes "Unknown" at 197
 WV_COUNTY_START = 201
 # WV goes to end of row
-
-TYPE_MAP = {
-    'Legislative petition': 'legislative',
-    'Declaration for Revolutionary War pension': 'pension',
-}
 
 
 class Command(BaseCommand):
@@ -110,23 +105,9 @@ class Command(BaseCommand):
         return subjects
 
     def _create_petition(self, row, serial):
-        parsed_date = None
-        date_str = row[6].strip() if len(row) > 6 else ''
-        if date_str:
-            try:
-                parts = date_str.split('-')
-                parsed_date = date(int(parts[0]), int(parts[1]), int(parts[2]))
-            except (ValueError, IndexError):
-                pass
-
-        raw_type = row[14].strip() if len(row) > 14 else ''
-        petition_type = TYPE_MAP.get(raw_type, 'legislative')
-
-        description = row[7].strip() if len(row) > 7 else ''
-        # Strip the boilerplate that appears in every description
-        boilerplate_marker = 'Petitions to the General Assembly were'
-        if boilerplate_marker in description:
-            description = description[:description.index(boilerplate_marker)].rstrip('; ')
+        parsed_date = lva.parse_date(row[6] if len(row) > 6 else '')
+        petition_type = lva.parse_type(row[14] if len(row) > 14 else '')
+        description = lva.clean_description(row[7] if len(row) > 7 else '')
 
         return Petition.objects.create(
             serial=serial,
