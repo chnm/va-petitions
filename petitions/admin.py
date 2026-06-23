@@ -26,8 +26,9 @@ class SubjectAdmin(admin.ModelAdmin):
 
 @admin.register(Petition)
 class PetitionAdmin(admin.ModelAdmin):
-    list_display = ['serial', 'title', 'petition_type', 'date', 'locality_raw']
-    list_filter = ['petition_type', 'subjects']
+    list_display = ['serial', 'title', 'petition_type', 'kind', 'primary_theme', 'date', 'locality_raw']
+    list_filter = ['petition_type', 'kind', 'primary_theme', 'subjects']
+    list_editable = ['kind', 'primary_theme']
     search_fields = ['title', 'description', 'serial']
     filter_horizontal = ['counties', 'subjects']
     readonly_fields = ['rosetta_url']
