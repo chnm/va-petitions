@@ -22,7 +22,7 @@ uv run python manage.py geocode_counties [--overwrite]         # Populate county
 
 - **`config/`** — Django project settings, root URL conf (`config/urls.py` includes both `petitions.urls` and `pages.urls` at root).
 - **`petitions/`** — Core app. Models: `Petition` (with `kind`, `primary_theme` fields), `County` (with state: VA/WV/KY/PA), `Subject`. Petitions connect to counties and subjects via M2M. Views: catalogue (server-side paginated), map (Leaflet + AJAX detail panel), search (server-side), petition detail, county list/detail.
-- **`pages/`** — Home page and about. Home view provides petition/county/subject counts.
+- **`pages/`** — Home, about, and two model-backed content pages: Introduction essay (`Essay`) and Educational Resources (`ResourcePage` + `Resource` cards). `Essay`/`ResourcePage` are admin-edited singletons (`has_add_permission` guard); their Markdown body fields render via the `markdown` lib.
 - **`theme/`** — django-tailwind app (v4 standalone, no Node required). Source CSS in `theme/static_src/src/styles.css`. Built CSS output in `theme/static/css/dist/styles.css`.
 - **`templates/`** — Project-level templates. `base.html` includes masthead, footer, and loads Tailwind + Google Fonts.
 - **`static/img/`** — Footer logos (chnm-logo.png, gmu-logo.png).
@@ -30,10 +30,13 @@ uv run python manage.py geocode_counties [--overwrite]         # Populate county
 ## URL Structure
 
 - `/` — Home ("Laid Before the Assembly")
+- `/introduction/` — Interpretive essay (singleton `Essay`, Markdown body with footnotes → Notes, pull quotes)
 - `/catalogue/` — Paginated catalogue with type/subject/locality filters
-- `/map/` — Leaflet map with county markers, ranked panel, AHCB boundary toggle + time slider
-- `/map/county/<slug>/` — AJAX endpoint returning petitions for a county (JSON)
+- `/map/` — Leaflet map with county markers, ranked panel, subject + year-range filter bar, AHCB boundary toggle
+- `/map/county/<slug>/` — AJAX endpoint returning petitions for a county (JSON); honors `?subject=&from=&to=` filters
 - `/search/?q=` — Server-side search across title, description, locality, subjects
+- `/resources/` — Educational Resources cards (`Resource`), linking out to teachinghistory.org
+- `/health/` — Liveness check returning `{"status":"ok","code":200}` for the Docker host to poll
 - `/#about` — About section on home page
 - `/admin/` — Django admin
 
@@ -47,9 +50,11 @@ uv run python manage.py geocode_counties [--overwrite]         # Populate county
 
 The CSV import (`import_petitions`) maps the spreadsheet's binary Yes/No county columns directly to M2M relationships — this is the source of truth for geographic assignments, not the `Locality` text field. County slugs are prefixed with state code. Subjects come from both binary columns and the semicolon-delimited `Subject` field.
 
+Two import paths share the transform logic in `petitions/lva.py`: the `import_petitions` command (bulk/initial CLI loads) and a django-import-export `PetitionResource` (admin **Import** button on the Petition changelist; `.xlsx`/`.csv`, keyed on `Serial` — edit existing or append new, with a dry-run preview). The admin import *replaces* a petition's counties/subjects from the sheet. VA/WV county names are unique (the two states never share a name), so binary columns resolve by name; KY/PA counties come from the semicolon locality columns. New counties/subjects not already in the DB aren't auto-created from binary columns.
+
 ## Map
 
-The map view (`/map/`) uses Leaflet with CARTO tiles. County markers are sized by `sqrt(count)` with opacity scaled by ratio to max. The right panel shows a ranked list of counties; clicking a county (in panel or on map) fetches its petitions via AJAX and pans/zooms the map. Historical county boundaries are fetched from the AHCB API (`data.chnm.org/ahcb/counties/{date}/state-code/va,wv,ky,pa/`). A time slider (1773–1861) controls the boundary year with 300ms debounce. The API uses modern state codes even for historical dates.
+The map view (`/map/`) uses Leaflet with CARTO tiles. A filter bar above the map holds a subject dropdown and a dual-handle year range; the view sends a compact per-petition dataset (year + county/subject indices) and the browser recomputes county counts, markers, and the ranked panel live as filters change (full year span = "All years", includes undated petitions). Markers are sized by `sqrt(count)` with opacity scaled relative to the *filtered* max (kept in sync with the panel bars — relative, not global, since War Claims/Pensions dominates). Clicking a county fetches its petitions via AJAX and pans/zooms; hovering a panel row highlights its bubble (the selected county keeps its ring). Historical county boundaries come from the AHCB API (`data.chnm.org/ahcb/counties/{date}/state-code/va,wv,ky,pa/`) and snap to the year range's end (the API takes a single date, not a range); boundary polygons use `interactive: false` so clicks fall through to markers. The API uses modern state codes even for historical dates.
 
 ## Design System
 
@@ -68,7 +73,7 @@ The map view (`/map/`) uses Leaflet with CARTO tiles. County markers are sized b
 ### Layout
 - Content max-width: 1280px (search page: 880px)
 - Side padding: 56px (`px-14`)
-- Use Tailwind utility classes in templates; no separate CSS files
+- Use Tailwind utility classes in templates; component CSS for Markdown-rendered HTML and custom widgets (`.essay-body`, `.dual-range`) lives in `theme/static_src/src/styles.css`
 - Rebuild Tailwind after template changes: `uv run python manage.py tailwind build`
 
 ## Style Conventions
