@@ -190,6 +190,18 @@ wheels = [
 ]
 
 [[package]]
+name = "django-unfold"
+version = "0.99.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "django" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/d3/4a/a41d4e38f51e2e832016ddaa8945caf579649aa0d1b017f893c47b6d4457/django_unfold-0.99.0.tar.gz", hash = "sha256:7f60f290a5ea533c575244b27f21ad2672cbdd52a4f059cfce9ebe4c2b28ee83", size = 1125919, upload-time = "2026-06-23T16:22:57.982Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/1a/a9/bb82cea6516cda3f069d69daff349b499b6216a407548d6e998f9857a85b/django_unfold-0.99.0-py3-none-any.whl", hash = "sha256:86e5bfbf8ab614e5eb28435e2707f6948b305cbd66c4a8ef09c78c964f5b2afd", size = 1253515, upload-time = "2026-06-23T16:22:56.376Z" },
+]
+
+[[package]]
 name = "et-xmlfile"
 version = "2.0.0"
 source = { registry = "https://pypi.org/simple" }
@@ -503,6 +515,7 @@ dependencies = [
     { name = "django" },
     { name = "django-import-export" },
     { name = "django-tailwind" },
+    { name = "django-unfold" },
     { name = "geopy" },
     { name = "markdown" },
     { name = "openpyxl" },
@@ -514,6 +527,7 @@ requires-dist = [
     { name = "django", specifier = ">=6.0.6" },
     { name = "django-import-export", specifier = ">=4.4.1" },
     { name = "django-tailwind", specifier = ">=4.4.2" },
+    { name = "django-unfold", specifier = ">=0.99.0" },
     { name = "geopy", specifier = ">=2.4.1" },
     { name = "markdown", specifier = ">=3.10.2" },
     { name = "openpyxl", specifier = ">=3.1.5" },

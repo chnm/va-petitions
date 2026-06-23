@@ -1,10 +1,11 @@
 from django.contrib import admin
+from unfold.admin import ModelAdmin
 
 from .models import Essay, Resource, ResourcePage
 
 
 @admin.register(Essay)
-class EssayAdmin(admin.ModelAdmin):
+class EssayAdmin(ModelAdmin):
     list_display = ("title", "author_name", "updated_at")
     fieldsets = (
         (None, {"fields": ("kicker", "title", "deck")}),
@@ -18,7 +19,7 @@ class EssayAdmin(admin.ModelAdmin):
 
 
 @admin.register(ResourcePage)
-class ResourcePageAdmin(admin.ModelAdmin):
+class ResourcePageAdmin(ModelAdmin):
     list_display = ("title", "updated_at")
 
     def has_add_permission(self, request):
@@ -27,7 +28,7 @@ class ResourcePageAdmin(admin.ModelAdmin):
 
 
 @admin.register(Resource)
-class ResourceAdmin(admin.ModelAdmin):
+class ResourceAdmin(ModelAdmin):
     list_display = ("title", "category", "order", "is_published")
     list_editable = ("order", "is_published")
     list_filter = ("category", "is_published")

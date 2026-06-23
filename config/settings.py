@@ -31,6 +31,8 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'unfold',  # must precede django.contrib.admin
+    'unfold.contrib.import_export',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -47,6 +49,13 @@ INSTALLED_APPS = [
 # Wrap imports in a transaction so the dry-run preview rolls back cleanly
 # (and a failed real import leaves no partial data).
 IMPORT_EXPORT_USE_TRANSACTIONS = True
+
+# django-unfold admin theme
+UNFOLD = {
+    'SITE_TITLE': 'By Petition — Admin',
+    'SITE_HEADER': 'By Petition',
+    'SITE_SUBHEADER': 'Library of Virginia petitions',
+}
 
 TAILWIND_APP_NAME = 'theme'
 

@@ -1,12 +1,14 @@
 from django.contrib import admin
 from import_export.admin import ImportExportModelAdmin
+from unfold.admin import ModelAdmin
+from unfold.contrib.import_export.forms import ExportForm, ImportForm
 
 from .models import County, Petition, Subject
 from .resources import PetitionResource
 
 
 @admin.register(County)
-class CountyAdmin(admin.ModelAdmin):
+class CountyAdmin(ModelAdmin):
     list_display = ['name', 'state', 'petition_count']
     list_filter = ['state']
     search_fields = ['name']
@@ -17,7 +19,7 @@ class CountyAdmin(admin.ModelAdmin):
 
 
 @admin.register(Subject)
-class SubjectAdmin(admin.ModelAdmin):
+class SubjectAdmin(ModelAdmin):
     list_display = ['name', 'petition_count']
     search_fields = ['name']
     prepopulated_fields = {'slug': ('name',)}
@@ -27,8 +29,10 @@ class SubjectAdmin(admin.ModelAdmin):
 
 
 @admin.register(Petition)
-class PetitionAdmin(ImportExportModelAdmin):
+class PetitionAdmin(ModelAdmin, ImportExportModelAdmin):
     resource_classes = [PetitionResource]
+    import_form_class = ImportForm
+    export_form_class = ExportForm
     list_display = ['serial', 'title', 'petition_type', 'kind', 'primary_theme', 'date', 'locality_raw']
     list_filter = ['petition_type', 'kind', 'primary_theme', 'subjects']
     list_editable = ['kind', 'primary_theme']
