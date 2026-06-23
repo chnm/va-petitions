@@ -18,7 +18,3 @@ def home(request):
 
 def about(request):
     return render(request, 'pages/about.html')
-
-
-def teaching(request):
-    return render(request, 'pages/teaching.html')

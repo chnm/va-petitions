@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}Search — By Petition{% endblock %}
+
+{% block content %}
+<div class="max-w-[880px] mx-auto w-full px-14 pt-16 pb-20 flex-1">
+    <div class="font-mono text-[12px] tracking-[0.3em] uppercase text-accent mb-[18px] text-center">Search the collection</div>
+    <h1 class="font-display font-normal text-[52px] leading-[1.05] m-0 tracking-[-0.01em] text-center">Search the petitions</h1>
+
+    <form action="{% url 'petitions:search' %}" method="get" class="flex mt-[38px] border-b-2 border-ink">
+        <input name="q" id="search-input" value="{{ q }}" autofocus placeholder="a petitioner, a place, a subject, a year&hellip;" class="flex-1 font-serif text-[26px] py-2 pb-4 border-none bg-transparent text-ink outline-none" />
+    </form>
+
+    {% if q %}
+    {# Results #}
+    <div>
+        <div class="flex justify-between items-baseline mt-6 mb-1">
+            <span class="font-mono text-[12px] tracking-[0.12em] uppercase text-ink">{{ results|length }} result(s)</span>
+            <a href="{% url 'petitions:catalogue' %}" class="font-mono text-[11px] tracking-[0.1em] uppercase text-accent">Open in the Catalogue &rarr;</a>
+        </div>
+
+        {% for petition in results %}
+        <div class="flex gap-6 py-[22px] border-b border-rule-light hover:bg-paper-deep">
+            <div class="flex-none w-[52px] font-mono text-[14px] text-accent pt-[3px]">{% if petition.date %}{{ petition.date.year }}{% endif %}</div>
+            <div class="flex-1">
+                <div class="font-serif text-[20px] font-bold leading-[1.25]">{{ petition.title }} <span class="font-normal italic text-meta-2">&middot; {{ petition.get_petition_type_display }}</span></div>
+                {% if petition.description %}
+                <div class="text-[16px] leading-[1.5] text-ink-soft mt-[7px]" style="text-wrap:pretty">{{ petition.description|truncatewords:40 }}</div>
+                {% endif %}
+                <div class="flex gap-5 items-center mt-[11px]">
+                    {% if petition.locality_raw %}
+                    <span class="font-mono text-[11px] tracking-[0.08em] uppercase text-meta">{{ petition.locality_raw }}</span>
+                    {% endif %}
+                    {% if petition.permalink %}
+                    <a href="{{ petition.permalink }}" target="_blank" rel="noopener" class="font-mono text-[11px] tracking-[0.1em] uppercase text-accent">Original &rarr;</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="py-11 text-center italic text-[19px] text-meta">No petitions match that search. Try a place, a name, or a year.</div>
+        {% endfor %}
+    </div>
+
+    {% else %}
+    {# Prompt #}
+    <div class="pt-10">
+        <div class="font-mono text-[11px] tracking-[0.18em] uppercase text-meta mb-[18px]">Try one of these</div>
+        <div class="flex flex-wrap gap-3">
+            {% for term in example_terms %}
+            <a href="?q={{ term }}" class="cursor-pointer font-mono text-[12px] tracking-[0.06em] py-[9px] px-4 border border-border bg-field text-ink-soft hover:bg-ink hover:text-paper hover:border-ink">{{ term }}</a>
+            {% endfor %}
+        </div>
+        <p class="text-[17px] leading-[1.6] text-ink-soft mt-[34px] max-w-[560px]" style="text-wrap:pretty">Search runs across petitioners, localities, subjects, and descriptions &mdash; or <a href="{% url 'petitions:catalogue' %}" class="text-accent border-b border-accent-border">browse the full collection in the Catalogue</a>.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

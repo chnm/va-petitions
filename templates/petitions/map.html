@@ -1,142 +1,264 @@
 {% extends "base.html" %}
+{% load static %}
 
-{% block title %}Map - Virginia Petitions{% endblock %}
+{% block title %}The Map — By Petition{% endblock %}
 
 {% block extra_head %}
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-<style>
-    #map { height: 600px; width: 100%; }
-    .count-label {
-        background: none;
-        border: none;
-        box-shadow: none;
-        font-size: 10px;
-        font-weight: bold;
-        color: #333;
-    }
-</style>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 {% endblock %}
 
 {% block content %}
-<h1 class="text-3xl font-bold mb-4">Browse by Map</h1>
-<div class="flex flex-wrap gap-4 items-center mb-2 text-sm">
-    <label class="flex items-center gap-1.5 cursor-pointer">
-        <input type="checkbox" id="toggle-boundaries" class="rounded">
-        Historical county boundaries
-    </label>
-    <label for="year-slider" class="text-gray-600">
-        Year: <span id="boundary-year" class="font-mono font-medium text-gray-800">1800</span>
-    </label>
-    <input type="range" id="year-slider" min="1773" max="1861" value="1800" step="1" disabled
-           class="w-48 accent-red-800 disabled:opacity-40">
+<div class="max-w-[1280px] mx-auto pt-[54px] px-14 pb-7">
+    <div class="font-mono text-[12px] tracking-[0.3em] uppercase text-accent mb-[18px]">The Geography of Petition</div>
+    <h1 class="font-display font-normal text-[52px] leading-[1.05] m-0 tracking-[-0.01em]">The Map</h1>
+    <p class="text-[18px] leading-[1.6] text-ink-soft max-w-[660px] mt-[18px]" style="text-wrap:pretty">Petitions plotted to the counties they name, across Virginia and the lands that became West Virginia and Kentucky. Toggle historical county boundaries and slide through the years, or select a locality to read its petitions.</p>
 </div>
-<div id="map" class="rounded border border-gray-200"></div>
+
+<div class="grid grid-cols-[1fr_384px] gap-0 max-w-[1280px] mx-auto px-14 pt-[14px] pb-16 items-stretch">
+
+    {# Map canvas #}
+    <div class="relative min-h-[640px] border border-border rounded-l-[2px]">
+        <div id="map" class="absolute inset-0 rounded-l-[2px]" style="z-index:1"></div>
+
+        {# Historical boundaries control #}
+        <div style="z-index:1000" class="absolute top-[18px] left-[18px] bg-[#f7f2e8] border border-border py-[14px] px-4" style="width:272px">
+            <div class="flex items-center justify-between gap-4">
+                <span class="font-mono text-[11px] tracking-[0.08em] uppercase text-ink leading-[1.4]">Historical boundaries<br><span class="text-meta">Atlas of Historical County Boundaries</span></span>
+                <button id="boundary-toggle" onclick="toggleBoundaries()" class="relative w-[42px] h-[23px] rounded-full border border-border bg-paper-deep-2 cursor-pointer flex-none p-0">
+                    <span id="toggle-knob" class="absolute top-[2px] left-[2px] w-[17px] h-[17px] rounded-full bg-field block" style="transition:left 0.15s"></span>
+                </button>
+            </div>
+            {# Year slider — shown when boundaries are on #}
+            <div id="slider-container" class="hidden mt-3 pt-3 border-t border-rule-light">
+                <div class="flex justify-between items-baseline mb-[6px]">
+                    <span class="font-mono text-[10px] tracking-[0.14em] uppercase text-meta">Year</span>
+                    <span id="year-display" class="font-mono text-[13px] text-accent font-bold">1800</span>
+                </div>
+                <input id="year-slider" type="range" min="1773" max="1861" value="1800" step="1"
+                       class="w-full cursor-pointer" style="accent-color:#7c3a2d;height:4px" />
+                <div class="flex justify-between font-mono text-[9px] text-meta mt-1">
+                    <span>1773</span><span>1861</span>
+                </div>
+            </div>
+        </div>
+
+        {# Legend #}
+        <div style="z-index:1000" class="absolute bottom-[18px] left-[18px] bg-[#f7f2e8] border border-border py-3 px-[14px]">
+            <div class="font-mono text-[10px] tracking-[0.14em] uppercase text-meta mb-2">Petitions per locality</div>
+            <div class="flex items-center gap-[7px]">
+                <span class="w-[18px] h-3 border border-border" style="background:rgba(124,58,45,0.18)"></span>
+                <span class="w-[18px] h-3" style="background:rgba(124,58,45,0.42)"></span>
+                <span class="w-[18px] h-3" style="background:rgba(124,58,45,0.68)"></span>
+                <span class="w-[18px] h-3" style="background:rgba(124,58,45,0.95)"></span>
+                <span class="font-mono text-[11px] text-ink-soft ml-1">1 &nbsp;&rarr;&nbsp; 4</span>
+            </div>
+        </div>
+    </div>
+
+    {# Right panel #}
+    <div class="border border-border border-l-0 bg-field py-6 px-6 pb-7 flex flex-col">
+
+        {# Ranked list (default) #}
+        <div id="panel-ranked">
+            <div class="flex justify-between items-baseline border-b border-ink pb-[11px] mb-[6px]">
+                <span class="font-mono text-[11px] tracking-[0.16em] uppercase text-ink">By county</span>
+                <span id="panel-stats" class="font-mono text-[11px] tracking-[0.08em] uppercase text-meta"></span>
+            </div>
+            <div id="ranked-list" class="max-h-[560px] overflow-auto -mx-2"></div>
+        </div>
+
+        {# Locality detail (when selected) #}
+        <div id="panel-detail" class="hidden">
+            <button onclick="deselectLocality()" class="border-none bg-transparent cursor-pointer font-mono text-[11px] tracking-[0.12em] uppercase text-accent p-0 pb-[14px]">&larr; All localities</button>
+            <div class="border-t border-ink pt-4">
+                <h3 id="detail-name" class="font-display font-normal text-[26px] m-0 leading-[1.15]"></h3>
+                <div id="detail-count" class="font-mono text-[11px] tracking-[0.1em] uppercase text-meta mt-2"></div>
+            </div>
+            <div id="detail-records" class="max-h-[520px] overflow-auto mt-2"></div>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block extra_js %}
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-    const map = L.map('map').setView([37.5, -79.5], 7);
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/">CARTO</a>',
-        subdomains: 'abcd',
-        maxZoom: 19
+const COUNTIES = {{ counties_json|safe }};
+const TOTAL = {{ total_petitions }};
+let boundariesOn = false;
+let boundaryLayer = null;
+let selectedCounty = null;
+let fetchTimeout = null;
+let currentYear = 1800;
+
+const maxCount = COUNTIES.length ? COUNTIES[0].count : 1;
+
+// Initialize map
+const map = L.map('map', { zoomControl: true }).setView([37.8, -79.5], 7);
+L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+    attribution: '&copy; OpenStreetMap &copy; CARTO',
+    maxZoom: 19
+}).addTo(map);
+setTimeout(() => map.invalidateSize(), 100);
+
+// Add county markers — keyed by slug for cross-referencing
+const markers = {};
+const maxC = COUNTIES.length ? Math.max(...COUNTIES.map(x => x.count)) : 1;
+COUNTIES.forEach(c => {
+    if (!c.lat || !c.lng) return;
+    const ratio = c.count / maxC;
+    const opacity = ratio < 0.25 ? 0.18 : ratio < 0.5 ? 0.42 : ratio < 0.75 ? 0.68 : 0.95;
+    const marker = L.circleMarker([c.lat, c.lng], {
+        radius: 6 + Math.sqrt(c.count) * 3,
+        fillColor: '#7c3a2d',
+        fillOpacity: opacity,
+        color: '#7c3a2d',
+        weight: 1,
+        opacity: 0.6
     }).addTo(map);
+    marker.bindPopup(`<strong>${esc(c.name)}</strong><br>${c.count} petition(s)`);
+    marker.on('click', () => selectCounty(c.slug, c.name));
+    markers[c.slug] = { marker, lat: c.lat, lng: c.lng };
+});
 
-    const counties = [
-        {% for county in counties %}
-        {
-            name: "{{ county.name }}, {{ county.get_state_display }}",
-            lat: {{ county.latitude }},
-            lng: {{ county.longitude }},
-            count: {{ county.petition_count }},
-            url: "{% url 'petitions:county_detail' county.slug %}"
-        },
-        {% endfor %}
-    ];
+// Render ranked panel from COUNTIES (already sorted by count desc)
+function renderPanel() {
+    document.getElementById('panel-stats').textContent =
+        `${TOTAL} \u00b7 ${COUNTIES.length} counties`;
 
-    const markerLayer = L.layerGroup().addTo(map);
-    const labelLayer = L.layerGroup();
-
-    counties.forEach(function(c) {
-        const marker = L.circleMarker([c.lat, c.lng], {
-            radius: Math.min(3 + Math.log2(c.count + 1) * 2, 12),
-            fillColor: '#e74c3c',
-            color: '#c0392b',
-            weight: 1,
-            fillOpacity: 0.6
-        }).addTo(markerLayer);
-        marker.bindPopup(
-            '<strong><a href="' + c.url + '">' + c.name + '</a></strong><br>' +
-            c.count + ' petition' + (c.count !== 1 ? 's' : '')
-        );
-
-        const label = L.tooltip({
-            permanent: true,
-            direction: 'center',
-            className: 'count-label'
-        }).setContent(String(c.count)).setLatLng([c.lat, c.lng]);
-        labelLayer.addLayer(label);
+    let html = '';
+    COUNTIES.forEach(c => {
+        const w = ((c.count / maxCount) * 100).toFixed(0);
+        html += `<button onclick="selectCounty('${esc(c.slug)}','${esc(c.name).replace(/'/g, "\\'")}')" class="block w-full text-left border-none bg-transparent cursor-pointer py-[11px] px-2 border-b border-paper-deep hover:bg-paper-deep">
+            <div class="flex justify-between items-baseline">
+                <span class="font-serif text-[16px] text-ink">${esc(c.name)}</span>
+                <span class="font-mono text-[12px] text-accent">${c.count}</span>
+            </div>
+            <div class="h-1 bg-paper-deep mt-[7px]"><div class="h-1 bg-accent" style="width:${w}%"></div></div>
+        </button>`;
     });
+    document.getElementById('ranked-list').innerHTML = html;
+}
 
-    L.control.layers(null, {
-        'Petition counts': labelLayer
-    }, { collapsed: false }).addTo(map);
-
-    // Historical county boundaries
-    const boundaryLayer = L.layerGroup();
-    const toggleCheckbox = document.getElementById('toggle-boundaries');
-    const yearSlider = document.getElementById('year-slider');
-    const yearLabel = document.getElementById('boundary-year');
-    let fetchTimeout = null;
-
-    function formatDate(year) {
-        return year + '-01-01';
+function highlightMarker(slug) {
+    Object.values(markers).forEach(({ marker }) => {
+        marker.setStyle({ color: '#7c3a2d', weight: 1 });
+    });
+    const entry = markers[slug];
+    if (entry) {
+        entry.marker.setStyle({ color: '#221d16', weight: 3 });
+        entry.marker.bringToFront();
+        map.flyTo([entry.lat, entry.lng], 9, { duration: 0.5 });
     }
+}
 
-    function fetchBoundaries(year) {
-        const dateStr = formatDate(year);
-        const url = 'https://data.chnm.org/ahcb/counties/' + dateStr + '/state-code/va,wv,ky,pa/';
+function selectCounty(slug, name) {
+    selectedCounty = slug;
+    document.getElementById('panel-ranked').classList.add('hidden');
+    document.getElementById('panel-detail').classList.remove('hidden');
+    document.getElementById('detail-name').textContent = name;
+    document.getElementById('detail-count').textContent = 'Loading\u2026';
+    document.getElementById('detail-records').innerHTML = '';
 
-        fetch(url)
-            .then(function(resp) { return resp.json(); })
-            .then(function(geojson) {
-                boundaryLayer.clearLayers();
-                L.geoJSON(geojson, {
-                    style: {
-                        color: '#2c3e50',
-                        weight: 1.5,
-                        fillColor: '#3498db',
-                        fillOpacity: 0.08
-                    },
-                    onEachFeature: function(feature, layer) {
-                        const props = feature.properties;
-                        layer.bindPopup(
-                            '<strong>' + props.name + '</strong><br>' +
-                            props.state_terr + ' (' + year + ')'
-                        );
-                    }
-                }).addTo(boundaryLayer);
+    highlightMarker(slug);
+
+    fetch(`/map/county/${encodeURIComponent(slug)}/`)
+        .then(r => r.json())
+        .then(records => {
+            document.getElementById('detail-count').textContent =
+                `${records.length} petition(s)`;
+            let html = '';
+            records.forEach(r => {
+                html += `<div class="py-4 border-b border-rule-light">
+                    <div class="flex justify-between items-baseline gap-3">
+                        <span class="font-serif text-[16px] font-bold leading-[1.25]">${esc(r.title)}</span>
+                        <span class="font-mono text-[12px] text-accent flex-none">${r.year || ''}</span>
+                    </div>
+                    <div class="text-[14.5px] leading-[1.5] text-ink-soft mt-[6px]" style="text-wrap:pretty">${esc(r.description)}</div>
+                    ${r.permalink ? `<a href="${esc(r.permalink)}" target="_blank" rel="noopener" class="inline-block mt-[9px] font-mono text-[10.5px] tracking-[0.1em] uppercase text-accent border-b border-accent-border pb-[2px]">Original &rarr;</a>` : ''}
+                </div>`;
             });
-    }
+            document.getElementById('detail-records').innerHTML = html;
+        })
+        .catch(e => {
+            document.getElementById('detail-count').textContent = 'Error loading petitions';
+            console.error('County fetch error:', e);
+        });
+}
 
-    toggleCheckbox.addEventListener('change', function() {
-        if (this.checked) {
-            yearSlider.disabled = false;
-            boundaryLayer.addTo(map);
-            fetchBoundaries(parseInt(yearSlider.value));
-        } else {
-            yearSlider.disabled = true;
+function deselectLocality() {
+    Object.values(markers).forEach(({ marker }) => {
+        marker.setStyle({ color: '#7c3a2d', weight: 1 });
+    });
+    map.flyTo([37.8, -79.5], 7, { duration: 0.5 });
+    selectedCounty = null;
+    document.getElementById('panel-detail').classList.add('hidden');
+    document.getElementById('panel-ranked').classList.remove('hidden');
+}
+
+function toggleBoundaries() {
+    boundariesOn = !boundariesOn;
+    const toggle = document.getElementById('boundary-toggle');
+    const knob = document.getElementById('toggle-knob');
+    const slider = document.getElementById('slider-container');
+
+    if (boundariesOn) {
+        toggle.style.background = '#7c3a2d';
+        toggle.style.borderColor = '#7c3a2d';
+        knob.style.left = '21px';
+        slider.classList.remove('hidden');
+        fetchBoundaries(currentYear);
+    } else {
+        toggle.style.background = '#e6ddca';
+        toggle.style.borderColor = '#cabfa6';
+        knob.style.left = '2px';
+        slider.classList.add('hidden');
+        if (boundaryLayer) {
             map.removeLayer(boundaryLayer);
+            boundaryLayer = null;
         }
-    });
+    }
+}
 
-    yearSlider.addEventListener('input', function() {
-        yearLabel.textContent = this.value;
-        clearTimeout(fetchTimeout);
-        fetchTimeout = setTimeout(function() {
-            fetchBoundaries(parseInt(yearSlider.value));
-        }, 300);
-    });
+// Year slider
+const yearSlider = document.getElementById('year-slider');
+const yearDisplay = document.getElementById('year-display');
+
+yearSlider.addEventListener('input', function() {
+    currentYear = parseInt(this.value);
+    yearDisplay.textContent = currentYear;
+    if (!boundariesOn) return;
+    clearTimeout(fetchTimeout);
+    fetchTimeout = setTimeout(() => fetchBoundaries(currentYear), 300);
+});
+
+function fetchBoundaries(year) {
+    if (boundaryLayer) {
+        map.removeLayer(boundaryLayer);
+        boundaryLayer = null;
+    }
+    const dateStr = year + '-01-01';
+    fetch(`https://data.chnm.org/ahcb/counties/${dateStr}/state-code/va,wv,ky,pa/`)
+        .then(r => r.json())
+        .then(data => {
+            if (!boundariesOn) return;
+            boundaryLayer = L.geoJSON(data, {
+                style: {
+                    color: '#7c6a4f',
+                    weight: 1.5,
+                    fillOpacity: 0,
+                    dashArray: '5,5'
+                }
+            }).addTo(map);
+        })
+        .catch(e => console.error('AHCB fetch error:', e));
+}
+
+function esc(s) {
+    if (s == null) return '';
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+renderPanel();
 </script>
 {% endblock %}
