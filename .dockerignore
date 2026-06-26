@@ -1,0 +1,28 @@
+# VCS / tooling
+.git
+.gitignore
+.claude
+.DS_Store
+
+# Local Python env / caches (never ship a host-built, glibc venv)
+.venv
+**/__pycache__
+*.pyc
+*.egg-info
+
+# Local SQLite DB (legacy) + env secrets + locally-collected static
+db.sqlite3
+.env
+staticfiles/
+
+# Tailwind standalone binary is downloaded during the build, not copied in
+theme/static_src/tailwindcss
+
+# Untracked source data per CLAUDE.md
+*.csv
+statement.md
+
+# Image build inputs that don't belong in the context
+Dockerfile
+.dockerignore
+README.md
