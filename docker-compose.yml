@@ -1,0 +1,28 @@
+# Local development stack:  docker compose up --build
+#
+# Runs the app (built from ./Dockerfile) on SQLite, with dev-friendly env baked
+# in so it works with no .env. The database lives on a named volume so it
+# survives `docker compose down`/`up`. Production is deployed separately via the
+# Ansible-rendered docker-compose.yml.j2.
+name: va-petitions
+
+services:
+  app:
+    build: .
+    restart: unless-stopped
+    environment:
+      DEBUG: "True"
+      DJANGO_SECRET_KEY: "dev-insecure-do-not-use-in-prod"
+      DJANGO_ALLOWED_HOSTS: "localhost,127.0.0.1"
+      DJANGO_CSRF_TRUSTED_ORIGINS: "http://localhost,http://localhost:8000"
+      # SQLITE_PATH defaults to /data/db.sqlite3 in the image; just mount /data.
+    command: >
+      sh -c "uv run manage.py migrate &&
+             uv run manage.py runserver 0.0.0.0:8000"
+    ports:
+      - "8000:8000"
+    volumes:
+      - appdata:/data
+
+volumes:
+  appdata:
