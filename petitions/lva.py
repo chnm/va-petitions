@@ -52,6 +52,49 @@ def build_lookups():
     return counties, subjects
 
 
+def ensure_counties_and_subjects(headers):
+    """Create County/Subject records for every binary column header.
+
+    Mirrors the CLI import's pre-creation step so the admin import works on a
+    fresh database. Safe to call repeatedly — uses get_or_create.
+
+    ``headers`` should be the full list of column names from the spreadsheet.
+    Returns (county_lookup, subject_lookup) ready for assign_relations.
+    """
+    # The spreadsheet layout (column ranges match import_petitions command):
+    VA_COUNTY_START = 23
+    VA_COUNTY_END = 157
+    SUBJECT_START = 158
+    SUBJECT_END = 198
+    WV_COUNTY_START = 201
+
+    counties = {}
+    for state, names in [('VA', headers[VA_COUNTY_START:VA_COUNTY_END]),
+                         ('WV', headers[WV_COUNTY_START:])]:
+        for name in names:
+            name = name.strip()
+            if not name or name == 'Unknown':
+                continue
+            county, _ = County.objects.get_or_create(
+                slug=slugify(f'{state}-{name}'),
+                defaults={'name': name, 'state': state},
+            )
+            counties[name] = county
+
+    subjects = {}
+    for name in headers[SUBJECT_START:SUBJECT_END]:
+        name = name.strip()
+        if not name or name == 'Unknown':
+            continue
+        subject, _ = Subject.objects.get_or_create(
+            slug=slugify(name),
+            defaults={'name': name},
+        )
+        subjects[name] = subject
+
+    return counties, subjects
+
+
 def assign_relations(petition, row, county_lookup, subject_lookup, *, replace):
     """Set a petition's counties/subjects from a spreadsheet row dict.
 
@@ -73,8 +116,16 @@ def assign_relations(petition, row, county_lookup, subject_lookup, *, replace):
     # Semicolon-delimited Subject column.
     for name in str(row.get('Subject') or '').split(';'):
         name = name.strip()
-        if name and name != 'Unknown' and name in subject_lookup:
+        if not name or name == 'Unknown':
+            continue
+        if name in subject_lookup:
             subjects.add(subject_lookup[name])
+        else:
+            subj, _ = Subject.objects.get_or_create(
+                slug=slugify(name), defaults={'name': name},
+            )
+            subject_lookup[name] = subj
+            subjects.add(subj)
 
     # KY/PA modern localities (semicolon-delimited); created if missing.
     for column, state in [('KY_ModernLocality', 'KY'), ('PA_ModernLocality', 'PA')]:

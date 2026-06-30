@@ -59,7 +59,9 @@ class PetitionResource(resources.ModelResource):
         clean_model_instances = False
 
     def before_import(self, dataset, **kwargs):
-        # Build the name lookups once per import, not per row.
+        # Ensure all counties/subjects from the spreadsheet headers exist in the
+        # DB (mirrors the CLI import's pre-creation step), then build lookups.
+        lva.ensure_counties_and_subjects(dataset.headers)
         self._county_lookup, self._subject_lookup = lva.build_lookups()
         return super().before_import(dataset, **kwargs)
 
