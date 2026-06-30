@@ -20,8 +20,11 @@ STATE_NAMES = {
 @admin.action(description='Geocode selected counties (fill lat/lng via Nominatim)')
 def geocode_counties(modeladmin, request, queryset):
     geolocator = Nominatim(user_agent='va-petitions-admin')
-    success, failed = 0, 0
+    success, skipped, failed = 0, 0, 0
     for county in queryset:
+        if county.latitude is not None and county.longitude is not None:
+            skipped += 1
+            continue
         state_name = STATE_NAMES.get(county.state, county.state)
         query = f"{county.name}, {state_name}, USA"
         try:
@@ -38,7 +41,7 @@ def geocode_counties(modeladmin, request, queryset):
         time.sleep(1.1)  # Nominatim rate limit
     modeladmin.message_user(
         request,
-        f'Geocoded {success} counties, {failed} failed.',
+        f'Geocoded {success}, skipped {skipped} (already have coords), {failed} failed.',
         messages.SUCCESS if not failed else messages.WARNING,
     )
 
