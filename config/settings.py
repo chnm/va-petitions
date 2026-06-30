@@ -12,20 +12,45 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 
 from pathlib import Path
 
+import environ
+from dotenv import load_dotenv
+
+load_dotenv(verbose=True, override=True)
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve(strict=True).parent.parent
+
+env = environ.Env()
+READ_DOT_ENV_FILE = env.bool("DJANGO_READ_DOT_ENV_FILE", default=True)
+if READ_DOT_ENV_FILE:
+    env.read_env(str(BASE_DIR / ".env"))
+
+# FileAwareEnv also resolves <VAR>_FILE secrets (e.g. DJANGO_SECRET_KEY_FILE).
+env = environ.FileAwareEnv(
+    DEBUG=(bool, False),
+)
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure--ww%)bh)-^)xm)#$()!m$amzx04eqvqa1_rgq^)8ds)5o%-wf$'
+SECRET_KEY = env(
+    "DJANGO_SECRET_KEY",
+    default="django-insecure--ww%)bh)-^)xm)#$()!m$amzx04eqvqa1_rgq^)8ds)5o%-wf$",
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = env("DEBUG")
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS", default=["localhost"])
+# Always allow the container-internal loopback (local runserver and anything
+# polling the /health/ endpoint) regardless of the public DJANGO_ALLOWED_HOSTS.
+ALLOWED_HOSTS += ["localhost", "127.0.0.1"]
+
+CSRF_TRUSTED_ORIGINS = env.list(
+    "DJANGO_CSRF_TRUSTED_ORIGINS", default=["http://localhost"]
+)
 
 
 # Application definition
@@ -61,6 +86,9 @@ TAILWIND_APP_NAME = 'theme'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    # WhiteNoise serves collected static files in production; per its docs it
+    # must sit directly after SecurityMiddleware.
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -93,11 +121,24 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+    "default": {
+        "ENGINE": "django.db.backends.sqlite3",
+        # Point SQLITE_PATH at a mounted volume in production so the database
+        # survives redeploys; defaults to a file in the project root for local
+        # work. This site is small and read-heavy, so SQLite is a good fit.
+        "NAME": env("SQLITE_PATH", default=str(BASE_DIR / "db.sqlite3")),
+        "OPTIONS": {
+            # Wait up to 5s for a lock instead of erroring, and take the write
+            # lock at BEGIN so concurrent writers queue cleanly.
+            "timeout": 5,
+            "transaction_mode": "IMMEDIATE",
+        },
     }
 }
+
+
+# Cache: this site has no external cache server, so Django's default
+# in-process LocMemCache (no CACHES setting required) is sufficient.
 
 
 # Password validation
@@ -134,7 +175,17 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+    },
+}
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

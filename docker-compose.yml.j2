@@ -1,0 +1,42 @@
+# this is a Jinja2 template file used during the Ansible deployment
+# environment specific configuration can be found in our Ansible scripts
+#
+# This site uses SQLite (no Postgres) and does not use memcached or the autoheal
+# sidecar, so the db/memcached services, depends_on, and the autoheal label are
+# intentionally omitted from the shared template. The app's SQLite file is kept
+# on a named volume (configured via the app service's volumes + SQLITE_PATH).
+---
+name: {{ compose_stack_name }}
+
+services:
+
+  {{ caddy_svc | indent(width=2, first=True ) }}
+
+  {% set service = (stack.services | selectattr('name', 'eq', 'app') | first) %}
+
+  app:
+    image: ghcr.io/{{ template.git.package.image_name }}:{{ template.git.package.tag }}
+    restart: unless-stopped
+    {{ service | get_deploy_resources_by_service | indent(width=2) }}
+    {% if service.environment is defined %}
+
+    environment:
+{% for env in service.environment %}
+      - {{ env.key }}={{ env.value }}
+{% endfor %}
+    {% endif %}
+
+    command: >
+        sh -c "uv run manage.py migrate &&
+               uv run manage.py runserver 0.0.0.0:8000"
+    {% if service.volumes | default([]) | length > 0 %}
+
+    volumes:
+{% for vol in service.volumes %}
+    - {{ vol.host_path if vol.host_path is defined else vol.name }}:{{ vol.container_path }}
+{% endfor %}
+    {% endif %}
+
+volumes:
+  {{ caddy_vols | indent(width=2, first=True ) }}
+  {{ stack | get_all_named_volumes(compose_stack_name) | indent(width=2) }}
