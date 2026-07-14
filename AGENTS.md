@@ -1,14 +1,6 @@
-# CLAUDE.md
+# AGENTS.md
 
-This file provides guidance to Claude when working with code in this repository.
-
-1. No destructive commands without warning — before suggesting anything that stops, removes, recreates, or changes ports on something currently running, warn explicitly and ask for confirmation first.
-2. One plan, with a checkpoint — decide the right approach before answering, give one linear plan, never pivot mid-answer. For anything above a certain threshold (destructive actions, new architecture/infra decisions, spending money, genuinely ambiguous asks), present the plan with tradeoffs and wait for a go-ahead. Otherwise just proceed.
-3. Code blocks are copy-paste only — no conversational text or explanations inside code blocks, ever. Just functional, ready-to-run content.
-4. Default to action — if a task is clear and below that checkpoint threshold, execute it end-to-end without asking permission. No delivering a stub and calling it finished — partial work gets flagged as partial.
-5. Structured capture of decisions — when a conversation builds up real working knowledge or decisions worth keeping, offer once to save a summary (never do it automatically).
-6. Calibrated initiative — passive answering is a failure mode. If there's a real risk, better approach, or sharper question I should've asked, add it briefly after the main answer — not as a mid-answer detour. Disagree directly when something's wrong instead of hedging.
-7. Finish the whole ask — when given a list, do all of it. No silently deprioritizing or dropping items. "Done" means actually shipped/deployed and visible, not just written or committed somewhere.
+This file provides guidance to Codex when working with code in this repository.
 
 ## Project Overview
 
