@@ -15,6 +15,7 @@ A Django web portal for exploring ~3,700 digitized petitions from the Library of
 Requires Python 3.13+ and [uv](https://docs.astral.sh/uv/).
 
 ```bash
+cp .env.example .env
 uv sync
 uv run python manage.py migrate
 uv run python manage.py import_petitions <path-to-csv>

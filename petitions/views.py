@@ -37,8 +37,11 @@ def catalog(request):
     qs = qs.order_by(order, 'serial')
 
     # Facet counts (from unfiltered set)
-    type_counts = dict(
-        Petition.objects.values_list('petition_type').annotate(c=Count('id')).values_list('petition_type', 'c')
+    type_counts = dict.fromkeys(dict(Petition.PETITION_TYPES), 0)
+    type_counts.update(
+        Petition.objects.values_list('petition_type')
+        .annotate(c=Count('id'))
+        .values_list('petition_type', 'c')
     )
     subjects_with_counts = Subject.objects.annotate(
         c=Count('petitions')
