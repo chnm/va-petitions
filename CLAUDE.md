@@ -4,7 +4,7 @@ This file provides guidance to Claude when working with code in this repository.
 
 ## Project Overview
 
-"By Petition" — a Django web portal for ~3,700 digitized petitions from the Library of Virginia (1773–1861), including legislative petitions and Revolutionary War pension declarations. Petitions are linked to modern counties across VA, WV, KY, and PA via many-to-many relationships. The site title is "Laid Before the Assembly."
+"Records of Revolution" — a Django portal for ~3,700 digitized legal records from the Library of Virginia (1773–1861), including legislative petitions, Revolutionary War pension declarations, and related records. Records are linked to modern counties across VA, WV, KY, and PA via many-to-many relationships. The homepage subtitle is "War, Rights, Family, and Freedom in Virginia’s Legal Records."
 
 ## Commands
 
@@ -29,7 +29,7 @@ uv run python manage.py geocode_counties [--overwrite]         # Populate county
 
 ## URL Structure
 
-- `/` — Home ("Laid Before the Assembly")
+- `/` — Home ("Records of Revolution")
 - `/introduction/` — Interpretive essay (singleton `Essay`, Markdown body with footnotes → Notes, pull quotes)
 - `/catalog/` — Paginated catalog with type/subject/locality filters
 - `/map/` — Leaflet map with county markers, ranked panel, subject + year-range filter bar, AHCB boundary toggle
@@ -64,15 +64,19 @@ The map view (`/map/`) uses Leaflet with CARTO tiles. A filter bar above the map
 - **Courier Prime** (`font-mono`) — nav, labels, metadata, dates, counts, buttons
 
 ### Color Tokens (defined in `theme/static_src/src/styles.css`)
-- `paper` #f3ede1 (background), `paper-alt` #efe7d7, `paper-deep` #ece4d4 (hover)
+- `paper` #f3ede1 (background), `card` #f6f0e4, `paper-alt` #efe7d7, `paper-deep-2` #e4dcc8 (thumbnails)
 - `ink` #221d16 (primary text), `ink-soft` #574d3f, `ink-soft-2` #3f382d
-- `meta` #8a7f6c (metadata), `accent` #7c3a2d (links, active states)
-- `rule` #d9cfb9 (dividers), `border` #cabfa6 (inputs, panels), `field` #fbf8f0 (input fills)
+- `meta` #6f6555 (accessible metadata on paper), `accent` / `blue` #26415c (links, active states, structural fields)
+- `blue-deep` #1b2b3a (footer), `blue-text` #c3ccd4, `blue-text-muted` #9fb0c1
+- `rust` #7c3a2d (petition voice and true emphasis), `rust-border` #c8a99f
+- `ochre` #c9a86a and `ochre-light` #e4c58a (labels and dividers on blue)
+- `rule` #d9cfb9 (decorative dividers), `border` #8a7f6c (input and panel boundaries), `field` #fbf8f0 (input fills)
 - Footer colors: `footer-text`, `footer-label`, `footer-rule`, `footer-strong`
 
 ### Layout
-- Content max-width: 1280px (search page: 880px)
-- Side padding: 56px (`px-14`)
+- Primary content max-width: 1440px, with narrower prose measures inside that frame
+- Side padding: 24px mobile, 40px tablet, 56px desktop
+- Page headers use the full-bleed blue field; standard headers share `templates/partials/page_hero.html`
 - Use Tailwind utility classes in templates; component CSS for Markdown-rendered HTML and custom widgets (`.essay-body`, `.dual-range`) lives in `theme/static_src/src/styles.css`
 - Rebuild Tailwind after template changes: `uv run python manage.py tailwind build`
 
