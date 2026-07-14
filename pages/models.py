@@ -1,8 +1,23 @@
-from urllib.parse import urlparse
+import html
+import re
+from urllib.parse import parse_qs, urlparse
 
 import markdown
 from django.db import models
 from django.utils.safestring import mark_safe
+
+
+ROSETTA_ANCHOR_RE = re.compile(
+    r'<a href="(?P<url>https?://rosetta\.virginiamemory\.com/'
+    r'delivery/DeliveryManagerServlet\?[^\"]+)"(?P<attrs>[^>]*)>'
+    r'(?P<label>.*?)</a>',
+    re.IGNORECASE | re.DOTALL,
+)
+
+
+def _rosetta_identifier(url):
+    query = parse_qs(urlparse(html.unescape(url)).query)
+    return query.get('dps_pid', [''])[0]
 
 
 class Essay(models.Model):
@@ -53,8 +68,45 @@ class Essay(models.Model):
         ``extra`` bundles the footnotes extension (the NOTES section);
         ``smarty`` produces curly quotes and em dashes to match the design.
         """
-        html = markdown.markdown(self.body, extensions=["extra", "smarty"])
-        return mark_safe(html)
+        rendered = markdown.markdown(self.body, extensions=["extra", "smarty"])
+
+        # Older essay copy may still contain direct links into Rosetta. Resolve
+        # those identifiers through the imported LVA catalog permalinks at
+        # render time so database-managed copy cannot expose a brittle URL.
+        matches = list(ROSETTA_ANCHOR_RE.finditer(rendered))
+        identifiers = {
+            _rosetta_identifier(match.group('url')) for match in matches
+        }
+        identifiers.discard('')
+
+        if identifiers:
+            from petitions.models import Petition
+
+            permalinks = dict(
+                Petition.objects.filter(
+                    rosetta_ie__in=identifiers,
+                ).exclude(permalink='').values_list('rosetta_ie', 'permalink')
+            )
+
+            def catalog_link(match):
+                identifier = _rosetta_identifier(match.group('url'))
+                label = re.sub(
+                    r'Virginia Memory|Rosetta',
+                    'the online catalog',
+                    match.group('label'),
+                    flags=re.IGNORECASE,
+                )
+                permalink = permalinks.get(identifier)
+                if not permalink:
+                    return label
+                return (
+                    f'<a href="{html.escape(permalink, quote=True)}"'
+                    f'{match.group("attrs")}>{label}</a>'
+                )
+
+            rendered = ROSETTA_ANCHOR_RE.sub(catalog_link, rendered)
+
+        return mark_safe(rendered)
 
 
 class ResourcePage(models.Model):

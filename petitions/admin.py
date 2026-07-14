@@ -78,4 +78,3 @@ class PetitionAdmin(ModelAdmin, ImportExportModelAdmin):
     list_editable = ['kind', 'primary_theme']
     search_fields = ['title', 'description', 'serial']
     filter_horizontal = ['counties', 'subjects']
-    readonly_fields = ['rosetta_url']

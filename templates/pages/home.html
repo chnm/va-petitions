@@ -1,64 +1,82 @@
 {% extends "base.html" %}
+{% load static %}
 
-{% block title %}Laid Before the Assembly — By Petition{% endblock %}
+{% block title %}Records of Revolution{% endblock %}
 
 {% block content %}
-{# Hero #}
-<div class="max-w-[1280px] mx-auto">
-    <div class="text-center py-[104px] px-24 pb-[60px]">
-        <div class="font-mono text-[12px] tracking-[0.32em] uppercase text-accent mb-[34px]">Library of Virginia &middot; 1773 &ndash; 1861</div>
-        <h1 class="font-display font-normal text-[96px] leading-[1.0] m-0 tracking-[-0.015em]">Laid Before<br>the Assembly</h1>
-        <p class="italic text-[22px] leading-[1.62] text-ink-soft max-w-[672px] mx-auto mt-9" style="text-wrap:pretty">Petitions and pension declarations through which early Virginians addressed the Commonwealth.</p>
-        <div class="w-16 h-px bg-ink mx-auto mt-12"></div>
-    </div>
+{# Blue hero #}
+<section class="w-full bg-blue text-paper">
+    <div class="max-w-[1440px] mx-auto px-6 sm:px-14 lg:px-24 py-14 sm:py-16 lg:py-[72px]">
+        <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(320px,400px)] xl:grid-cols-[minmax(0,1fr)_420px] gap-14 lg:gap-16 xl:gap-20 items-center">
+            <div>
+                <div class="font-mono text-[13px] tracking-[0.18em] uppercase text-ochre mb-7 sm:mb-9">The Revolutionary Records of Virginia</div>
+                <h1 class="font-display font-normal text-[54px] sm:text-[72px] xl:text-[84px] leading-[0.98] m-0 tracking-[-0.015em] max-w-[760px]">Records of Revolution</h1>
+                <p class="text-[20px] sm:text-[24px] leading-[1.55] text-blue-text max-w-[680px] mt-7 sm:mt-9" style="text-wrap:pretty">War, Rights, Family, and Freedom in Virginia&rsquo;s Legal Records.</p>
+                <!-- <div class="w-16 h-px bg-ochre mt-10 sm:mt-12"></div> -->
+            </div>
 
-    {# Stats row #}
-    <div class="flex justify-center gap-24 px-20 pb-[84px]">
+            <figure class="m-0 w-full max-w-[320px] sm:max-w-[370px] lg:max-w-[400px] xl:max-w-[420px] mx-auto lg:mx-0 lg:justify-self-end">
+                <a href="https://lva.primo.exlibrisgroup.com/permalink/01LVA_INST/altrmk/alma9917811905405756" target="_blank" rel="noopener" class="group block" aria-label="View Dissenters in Albemarle, Amherst, and Buckingham: Petition in the Library of Virginia online catalog (opens in a new tab)">
+                    <span class="block border border-blue-label p-3 bg-blue-deep shadow-[0_24px_60px_rgba(10,23,35,0.38)]">
+                        <img src="{% static 'img/dissenters-petition-1776.webp' %}" alt="First page of a handwritten 1776 petition from religious dissenters in Albemarle, Amherst, and Buckingham Counties" class="block w-full aspect-[4/5] object-cover object-top grayscale" />
+                    </span>
+                    <figcaption class="font-mono text-[12px] leading-[1.55] tracking-[0.08em] uppercase text-blue-text mt-4 group-hover:text-ochre-light">
+                        Dissenters in Albemarle, Amherst, &amp; Buckingham &middot; 1776 <span class="text-ochre-light">&middot; View record &rarr;</span>
+                    </figcaption>
+                </a>
+            </figure>
+        </div>
+    </div>
+</section>
+
+{# Stats row #}
+<div class="max-w-[1440px] mx-auto">
+    <div class="flex flex-wrap justify-center gap-12 sm:gap-20 lg:gap-24 px-6 sm:px-20 py-14 sm:py-[72px]">
         <div class="text-center">
             <div class="font-display text-[64px] leading-[1] text-ink">{{ petition_count }}</div>
-            <div class="font-mono text-[11px] tracking-[0.2em] uppercase text-meta mt-[14px]">Petitions</div>
+            <div class="font-mono text-[13px] tracking-[0.16em] uppercase text-meta mt-[14px]">Records</div>
         </div>
         <div class="text-center">
-            <div class="font-display text-[64px] leading-[1] text-ink">{{ county_count }}</div>
-            <div class="font-mono text-[11px] tracking-[0.2em] uppercase text-meta mt-[14px]">Counties</div>
+            <div class="font-display text-[64px] leading-[1] text-ink">{{ locality_count }}</div>
+            <div class="font-mono text-[13px] tracking-[0.16em] uppercase text-meta mt-[14px]">Named Localities</div>
         </div>
         <div class="text-center">
             <div class="font-display text-[64px] leading-[1] text-ink">{{ subject_count }}</div>
-            <div class="font-mono text-[11px] tracking-[0.2em] uppercase text-meta mt-[14px]">Subjects</div>
+            <div class="font-mono text-[13px] tracking-[0.16em] uppercase text-meta mt-[14px]">Subjects</div>
         </div>
     </div>
 </div>
 
 {# Featured quote #}
 <div class="border-t border-rule">
-    <div class="max-w-[1280px] mx-auto py-[72px] px-24 pb-20 text-center">
-        <blockquote class="italic text-[32px] leading-[1.5] mx-auto max-w-[800px] text-ink" style="text-wrap:pretty">&ldquo;The hopes of your Petitioners have been raised and confirmed by the Declaration of your Honourable House with regard to equal Liberty. Equal Liberty! that invaluable Blessing; which though it be the Birthright of every good Member of the State, is what your Petitioners have been deprived of.&rdquo;</blockquote>
-        <a href="https://rosetta.virginiamemory.com/delivery/DeliveryManagerServlet?dps_pid=IE3435021" target="_blank" rel="noopener" class="inline-block mt-[26px] italic text-[17px] text-accent border-b border-accent-border pb-[3px]">Examine the original at Virginia Memory &rarr;</a>
+    <div class="max-w-[1440px] mx-auto py-14 sm:py-[72px] px-6 sm:px-14 lg:px-24 sm:pb-20 text-center">
+        <blockquote class="italic text-[25px] sm:text-[32px] leading-[1.5] mx-auto max-w-[800px] text-ink" style="text-wrap:pretty">&ldquo;The hopes of your Petitioners have been raised and confirmed by the Declaration of your Honourable House with regard to equal Liberty. <span style="color: #7c3a2d">Equal Liberty!</span> that invaluable Blessing; which though it be the Birthright of every good Member of the State, is what your Petitioners have been deprived of.&rdquo;</blockquote>
+        <p class="mt-[26px] font-mono text-[13px] leading-[1.7] tracking-[0.08em] uppercase text-rust">Dissenters: Petition &middot; October 16, 1776 &middot; Library of Virginia</p>
     </div>
 </div>
 
 {# Ways into the collection #}
 <div class="border-t border-rule bg-paper-alt">
-    <div class="max-w-[1280px] mx-auto py-16 px-24 pb-[72px]">
-        <div class="font-mono text-[11px] tracking-[0.26em] uppercase text-meta mb-9">Ways into the collection</div>
-        <div class="grid grid-cols-3 border-t border-ink">
-            <a class="block py-[34px] px-[30px] pb-10 border-r border-rule hover:bg-paper-deep" href="{% url 'petitions:catalog' %}">
-                <div class="font-mono text-[11px] tracking-[0.16em] text-accent">01</div>
-                <div class="font-display text-[30px] mt-[18px] mb-3">The Catalog</div>
-                <div class="text-[16px] leading-[1.55] text-ink-soft max-w-[300px]">Browse the full collection in a table you can filter by type, subject, and county, and sort by date.</div>
-                <div class="font-mono text-[11px] tracking-[0.14em] uppercase text-accent mt-[22px]">Browse the table &rarr;</div>
+    <div class="max-w-[1440px] mx-auto py-14 sm:py-16 px-6 sm:px-14 lg:px-24 sm:pb-[72px]">
+        <div class="font-mono text-[13px] tracking-[0.18em] uppercase text-meta mb-9">Ways into the collection</div>
+        <div class="grid grid-cols-1 md:grid-cols-3 border-t border-ink">
+            <a class="block py-[34px] px-0 md:px-[30px] pb-10 border-b md:border-b-0 md:border-r border-rule hover:bg-paper-deep" href="{% url 'petitions:catalog' %}">
+                <div class="font-mono text-[13px] tracking-[0.14em] text-accent">01</div>
+                <div class="font-display text-[30px] mt-[18px] mb-3">The Catalogue</div>
+                <div class="text-[18px] leading-[1.6] text-ink-soft max-w-[320px]">Browse the full collection in a table you can filter by type, subject, and county, and sort by date.</div>
+                <div class="font-mono text-[13px] tracking-[0.12em] uppercase text-accent mt-[22px]">Browse the table &rarr;</div>
             </a>
-            <a class="block py-[34px] px-[30px] pb-10 border-r border-rule hover:bg-paper-deep" href="{% url 'petitions:map' %}">
-                <div class="font-mono text-[11px] tracking-[0.16em] text-accent">02</div>
+            <a class="block py-[34px] px-0 md:px-[30px] pb-10 border-b md:border-b-0 md:border-r border-rule hover:bg-paper-deep" href="{% url 'petitions:map' %}">
+                <div class="font-mono text-[13px] tracking-[0.14em] text-accent">02</div>
                 <div class="font-display text-[30px] mt-[18px] mb-3">The Map</div>
-                <div class="text-[16px] leading-[1.55] text-ink-soft max-w-[300px]">See where the petitions came from across Virginia, with historical county boundaries laid over the modern map.</div>
-                <div class="font-mono text-[11px] tracking-[0.14em] uppercase text-accent mt-[22px]">Explore the map &rarr;</div>
+                <div class="text-[18px] leading-[1.6] text-ink-soft max-w-[320px]">See where the records came from across Virginia, with historical county boundaries laid over the modern map.</div>
+                <div class="font-mono text-[13px] tracking-[0.12em] uppercase text-accent mt-[22px]">Explore the map &rarr;</div>
             </a>
-            <a class="block py-[34px] px-[30px] pb-10 hover:bg-paper-deep" href="{% url 'petitions:search' %}">
-                <div class="font-mono text-[11px] tracking-[0.16em] text-accent">03</div>
+            <a class="block py-[34px] px-0 md:px-[30px] pb-10 hover:bg-paper-deep" href="{% url 'petitions:search' %}">
+                <div class="font-mono text-[13px] tracking-[0.14em] text-accent">03</div>
                 <div class="font-display text-[30px] mt-[18px] mb-3">Search</div>
-                <div class="text-[16px] leading-[1.55] text-ink-soft max-w-[300px]">Look for a petitioner, a place, a subject, or a year, and follow each record to its digitized manuscript.</div>
-                <div class="font-mono text-[11px] tracking-[0.14em] uppercase text-accent mt-[22px]">Begin a search &rarr;</div>
+                <div class="text-[18px] leading-[1.6] text-ink-soft max-w-[320px]">Look for a petitioner, a place, a subject, or a year, and follow each available record to the Library of Virginia online catalog.</div>
+                <div class="font-mono text-[13px] tracking-[0.12em] uppercase text-accent mt-[22px]">Begin a search &rarr;</div>
             </a>
         </div>
     </div>
@@ -66,11 +84,11 @@
 
 {# About #}
 <div id="about" class="border-t border-rule">
-    <div class="max-w-[760px] mx-auto py-[76px] px-14 pb-[88px]">
+    <div class="max-w-[760px] mx-auto py-16 sm:py-[76px] px-6 sm:px-14 sm:pb-[88px]">
         <h2 class="font-display font-normal text-[34px] m-0 mb-6 tracking-[-0.01em]">About the collection</h2>
-        <p class="text-[18px] leading-[1.68] text-ink-soft-2 m-0 mb-5" style="text-wrap:pretty">This portal gathers two bodies of records through which early Virginians spoke to their government: legislative petitions addressed to the General Assembly, and declarations made by veterans and their families in support of Revolutionary War pensions. Claims, protests, and sworn accounts are arranged here by the county they came from.</p>
-        <p class="text-[18px] leading-[1.68] text-ink-soft-2 m-0 mb-5" style="text-wrap:pretty">The legislative petitions are cataloged first. They range across private claims on the public treasury, contests over wills and estates, and organized protests including a substantial group touching the lives of enslaved Virginians, who appear throughout the record. Each document links to its digitized manuscript so it may be read in full, and the pension declarations are being added county by county.</p>
-        <p class="font-mono text-[12px] leading-[1.8] tracking-[0.04em] text-meta mt-8">Records held by the Library of Virginia. Page images served from the Virginia Memory / Rosetta digital repository. Geographic data derived from the catalog&rsquo;s county assignments.</p>
+        <p class="text-[18px] leading-[1.68] text-ink-soft-2 m-0 mb-5" style="text-wrap:pretty">This portal brings together legal records through which Virginians made claims on government, law, and one another during and after the American Revolution. Legislative petitions, pension declarations, and related court records preserve requests, protests, disputes, and sworn accounts from across the Commonwealth.</p>
+        <p class="text-[18px] leading-[1.68] text-ink-soft-2 m-0 mb-5" style="text-wrap:pretty">The records illuminate private claims on the public treasury, the costs and memories of war, contests over wills and estates, demands for religious and personal liberty, and the lives of enslaved Virginians who appear throughout the collection. Each available document links to its Library of Virginia online catalog record, where digitized materials may be viewed.</p>
+        <p class="font-mono text-[13px] leading-[1.8] tracking-[0.03em] text-meta mt-8">Records and online catalog maintained by the Library of Virginia. Geographic data derived from the catalog&rsquo;s county assignments.</p>
     </div>
 </div>
 {% endblock %}

@@ -4,62 +4,68 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{% block title %}By Petition{% endblock %}</title>
+    <title>{% block title %}Records of Revolution{% endblock %}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Libre+Caslon+Display&family=Libre+Caslon+Text:ital,wght@0,400;0,700;1,400&family=Courier+Prime:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
     {% tailwind_css %}
     {% block extra_head %}{% endblock %}
 </head>
-<body class="bg-paper text-ink font-serif m-0">
-	<div class="bg-amber-100 border-b border-amber-300 text-amber-800 text-center text-sm py-2 px-4">
+<body class="bg-paper text-ink font-serif text-[18px] m-0">
+	<div class="bg-amber-100 border-b border-amber-300 text-amber-800 text-center text-[16px] leading-[1.45] py-2 px-4">
 		This site is currently in beta. Pages, content, and data may be incomplete or contain errors.
 	</div>
 
-    <div class="min-h-screen bg-paper">
+    <div class="min-h-screen bg-paper flex flex-col">
 
     {# Masthead #}
-    <header class="w-full flex justify-between items-center py-[26px] px-14 border-b border-rule max-w-[1280px] mx-auto">
-        <a href="{% url 'pages:home' %}">
-            <div class="font-mono text-[15px] tracking-[0.34em] uppercase text-ink">By Petition</div>
-            <div class="font-mono text-[10.5px] tracking-[0.18em] uppercase text-meta mt-[5px]">A Digital History Project &middot; Library of Virginia</div>
-        </a>
-        <nav class="flex gap-8 font-mono text-[12px] tracking-[0.12em] uppercase text-ink-soft">
-            <a class="hover:text-accent{% if nav_active == 'introduction' %} text-ink border-b border-accent pb-[3px]{% endif %}" href="{% url 'pages:introduction' %}">Introduction</a>
-            <a class="hover:text-accent{% if nav_active == 'catalog' %} text-ink border-b border-accent pb-[3px]{% endif %}" href="{% url 'petitions:catalog' %}">Catalog</a>
-            <a class="hover:text-accent{% if nav_active == 'map' %} text-ink border-b border-accent pb-[3px]{% endif %}" href="{% url 'petitions:map' %}">Map</a>
-            <a class="hover:text-accent{% if nav_active == 'search' %} text-ink border-b border-accent pb-[3px]{% endif %}" href="{% url 'petitions:search' %}">Search</a>
-            <a class="hover:text-accent{% if nav_active == 'resources' %} text-ink border-b border-accent pb-[3px]{% endif %}" href="{% url 'pages:resources' %}">Resources</a>
-            <a class="hover:text-accent" href="{% url 'pages:home' %}#about">About</a>
-        </nav>
+    <header class="w-full border-b border-rule">
+        <div class="max-w-[1440px] mx-auto flex flex-col lg:flex-row lg:justify-between lg:items-center gap-6 lg:gap-10 py-6 sm:py-[30px] px-6 sm:px-10 lg:px-14">
+            <a href="{% url 'pages:home' %}">
+                <div class="flex items-center gap-4">
+                    <div class="font-display text-[30px] sm:text-[34px] leading-none tracking-[-0.015em] text-ink">Records of <span style="color: #7c3a2d;">Revolution</span></div>
+                    <!-- <div class="hidden sm:block w-12 h-px bg-accent" aria-hidden="true"></div> -->
+                </div>
+            </a>
+            <nav aria-label="Primary navigation" class="flex flex-wrap gap-x-5 gap-y-3 sm:gap-x-8 font-mono text-[14px] tracking-[0.1em] uppercase text-ink-soft">
+                <a class="inline-flex items-center min-h-[40px] hover:text-accent{% if nav_active == 'introduction' %} text-accent border-b border-accent{% endif %}" href="{% url 'pages:introduction' %}">Introduction</a>
+                <a class="inline-flex items-center min-h-[40px] hover:text-accent{% if nav_active == 'catalog' %} text-accent border-b border-accent{% endif %}" href="{% url 'petitions:catalog' %}">The Catalogue</a>
+                <a class="inline-flex items-center min-h-[40px] hover:text-accent{% if nav_active == 'map' %} text-accent border-b border-accent{% endif %}" href="{% url 'petitions:map' %}">Map</a>
+                <a class="inline-flex items-center min-h-[40px] hover:text-accent{% if nav_active == 'search' %} text-accent border-b border-accent{% endif %}" href="{% url 'petitions:search' %}">Search</a>
+                <a class="inline-flex items-center min-h-[40px] hover:text-accent{% if nav_active == 'resources' %} text-accent border-b border-accent{% endif %}" href="{% url 'pages:resources' %}">Resources</a>
+                <a class="inline-flex items-center min-h-[40px] hover:text-accent" href="{% url 'pages:home' %}#about">About</a>
+            </nav>
+        </div>
     </header>
 
-    {% block content %}{% endblock %}
+    <main class="flex-1">
+        {% block content %}{% endblock %}
+    </main>
 
     {# Footer #}
-    <footer class="bg-ink text-footer-text-2">
-        <div class="max-w-[1280px] mx-auto py-[54px] px-14 pb-[30px]">
-            <div class="flex justify-between items-start gap-14 flex-wrap">
-                <div class="max-w-[384px]">
-                    <div class="font-mono text-[15px] tracking-[0.34em] uppercase text-paper">By Petition</div>
-                    <p class="font-serif text-[15px] leading-[1.62] text-footer-text mt-4" style="text-wrap:pretty">Petitions and pension declarations from the Library of Virginia, through which early Virginians addressed the Commonwealth, 1773&ndash;1861.</p>
+    <footer id="site-footer" class="bg-blue-deep text-footer-text-2">
+        <div class="max-w-[1440px] mx-auto py-[54px] px-6 sm:px-10 lg:px-14 pb-[30px]">
+            <div class="grid grid-cols-1 lg:grid-cols-[minmax(260px,330px)_minmax(0,1fr)] gap-12 lg:gap-14 items-start">
+                <div class="max-w-[330px]">
+                    <div class="font-display text-[30px] leading-none tracking-[-0.01em] text-paper">Records of Revolution</div>
+                    <p class="font-serif text-[17px] leading-[1.62] text-footer-text mt-4" style="text-wrap:pretty">War, rights, family, and freedom in Virginia&rsquo;s petitions, pension declarations, and court records from the revolutionary era.</p>
                 </div>
-                <div class="flex gap-16 flex-wrap">
-                    <div>
-                        <div class="font-mono text-[10.5px] tracking-[0.18em] uppercase text-footer-label mb-[18px]">Produced by</div>
-                        <div class="flex flex-col gap-4">
-                            <a href="https://rrchnm.org" target="_blank" rel="noopener"><img src="{% static 'img/chnm-logo.png' %}" alt="Roy Rosenzweig Center for History and New Media" class="h-[36px] block" /></a>
-                            <a href="https://www.gmu.edu" target="_blank" rel="noopener"><img src="{% static 'img/gmu-logo.png' %}" alt="George Mason University" class="h-[46px] block" /></a>
-                        </div>
-                    </div>
-                    <div class="max-w-[246px]">
-                        <div class="font-mono text-[10.5px] tracking-[0.18em] uppercase text-footer-label mb-[18px]">Sources</div>
-                        <div class="font-serif text-[14px] leading-[1.6] text-footer-text">Records &amp; page images from the <strong class="text-footer-strong font-bold">Library of Virginia</strong> &mdash; Virginia Memory / Rosetta.</div>
-                    </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 2xl:grid-cols-[auto_auto_auto_auto] items-center justify-start lg:justify-self-end gap-x-7 gap-y-6" aria-label="Project partners">
+                    <a href="https://rrchnm.org" target="_blank" rel="noopener" class="inline-block"><img src="{% static 'img/chnm-logo.png' %}" alt="Roy Rosenzweig Center for History and New Media" class="h-[36px] w-auto block" /></a>
+                    <a href="https://www.gmu.edu" target="_blank" rel="noopener" class="inline-block"><img src="{% static 'img/gmu-logo.png' %}" alt="George Mason University" class="h-[42px] w-auto block" /></a>
+                    <a href="https://www.lva.virginia.gov/" target="_blank" rel="noopener" class="inline-block">
+                        <img src="{% static 'img/logo_stack_rev.svg' %}" alt="Library of Virginia" class="block w-[160px] max-w-full h-auto" />
+                    </a>
+                    <a href="https://www.lva.virginia.gov/" target="_blank" rel="noopener" class="relative block w-[170px] h-[60px] overflow-hidden" aria-label="Virginia 250">
+                        <span aria-hidden="true">
+                            <img src="{% static 'img/AMIV_VA250_white-let.png' %}" alt="" class="absolute w-[170px] h-auto max-w-none left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
+                        </span>
+                    </a>
                 </div>
             </div>
-            <div class="border-t border-footer-rule mt-10 pt-5 flex justify-between flex-wrap gap-3 font-mono text-[11px] tracking-[0.12em] uppercase text-footer-label">
+            <div class="border-t border-footer-rule mt-10 pt-5 flex justify-between flex-wrap gap-3 font-mono text-[12px] tracking-[0.1em] uppercase text-footer-label">
                 <span>&copy; 2026 Roy Rosenzweig Center for History and New Media &middot; George Mason University</span>
+                <span>Records and online catalog: Library of Virginia</span>
             </div>
         </div>
     </footer>
