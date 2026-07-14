@@ -1,30 +1,31 @@
 {% extends "base.html" %}
 
-{% block title %}{{ petition.title }} - Virginia Petitions{% endblock %}
+{% block title %}{{ petition.title }} — Records of Revolution{% endblock %}
 
 {% block content %}
-<h1 class="text-3xl font-bold mb-6">{{ petition.title }}</h1>
+{% include "partials/page_hero.html" with kicker=petition.get_petition_type_display title=petition.title deck=petition.locality_raw %}
 
-<dl class="grid grid-cols-[auto_1fr] gap-x-6 gap-y-3 mb-8 text-sm">
-    <dt class="font-semibold text-gray-500">Date</dt>
-    <dd class="font-mono">{{ petition.date|default:"Unknown" }}</dd>
+<article class="max-w-[1000px] mx-auto px-6 sm:px-10 lg:px-14 py-12 sm:py-16">
+<dl class="grid grid-cols-1 sm:grid-cols-[180px_1fr] gap-x-8 gap-y-4 mb-12 text-[18px] border-t border-rule pt-6">
+    <dt class="font-mono text-[13px] tracking-[0.12em] uppercase text-meta">Date</dt>
+    <dd>{{ petition.date|default:"Unknown" }}</dd>
 
-    <dt class="font-semibold text-gray-500">Type</dt>
+    <dt class="font-mono text-[13px] tracking-[0.12em] uppercase text-meta">Type</dt>
     <dd>{{ petition.get_petition_type_display }}</dd>
 
-    <dt class="font-semibold text-gray-500">Original locality</dt>
+    <dt class="font-mono text-[13px] tracking-[0.12em] uppercase text-meta">Original locality</dt>
     <dd>{{ petition.locality_raw|default:"Unknown" }}</dd>
 
-    <dt class="font-semibold text-gray-500">Counties (modern)</dt>
+    <dt class="font-mono text-[13px] tracking-[0.12em] uppercase text-meta">Counties (modern)</dt>
     <dd>
         {% for county in petition.counties.all %}
-            <a href="{% url 'petitions:county_detail' county.slug %}" class="text-red-800 hover:underline">{{ county }}</a>{% if not forloop.last %}, {% endif %}
+            <a href="{% url 'petitions:county_detail' county.slug %}" class="text-accent hover:underline">{{ county }}</a>{% if not forloop.last %}, {% endif %}
         {% empty %}
             <span class="text-gray-400">None assigned</span>
         {% endfor %}
     </dd>
 
-    <dt class="font-semibold text-gray-500">Subjects</dt>
+    <dt class="font-mono text-[13px] tracking-[0.12em] uppercase text-meta">Subjects</dt>
     <dd>
         {% for subject in petition.subjects.all %}
             {{ subject.name }}{% if not forloop.last %}, {% endif %}
@@ -33,19 +34,19 @@
         {% endfor %}
     </dd>
 
-    <dt class="font-semibold text-gray-500">Serial</dt>
+    <dt class="font-mono text-[13px] tracking-[0.12em] uppercase text-meta">Serial</dt>
     <dd class="font-mono">{{ petition.serial }}</dd>
 </dl>
 
-<h2 class="text-xl font-semibold mb-2">Description</h2>
-<p class="max-w-prose text-gray-600 mb-6">{{ petition.description }}</p>
+<h2 class="font-display text-[32px] mb-4">Description</h2>
+<p class="max-w-prose text-[18px] leading-[1.65] text-ink-soft mb-8">{{ petition.description }}</p>
 
-<div class="flex gap-4 text-sm">
-    {% if petition.rosetta_url %}
-    <a href="{{ petition.rosetta_url }}" target="_blank" class="text-red-800 hover:underline font-medium">View digitized petition &rarr;</a>
-    {% endif %}
+<div class="flex flex-wrap gap-6 font-mono text-[13px] tracking-[0.08em] uppercase">
     {% if petition.permalink %}
-    <a href="{{ petition.permalink }}" target="_blank" class="text-red-800 hover:underline font-medium">Catalog permalink &rarr;</a>
+    <a href="{{ petition.permalink }}" target="_blank" rel="noopener" aria-label="View in the Library of Virginia online catalog (opens in a new tab)" class="text-accent border-b border-accent-border pb-1">View in the online catalog &rarr;</a>
+    {% else %}
+    <span class="inline-block px-3 py-2 border border-accent bg-card text-accent">Online record coming soon</span>
     {% endif %}
 </div>
+</article>
 {% endblock %}

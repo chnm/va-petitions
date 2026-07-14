@@ -1,58 +1,98 @@
 {% extends "base.html" %}
 
-{% block title %}Search — By Petition{% endblock %}
+{% block title %}Search — Records of Revolution{% endblock %}
 
 {% block content %}
-<div class="max-w-[880px] mx-auto w-full px-14 pt-16 pb-20 flex-1">
-    <div class="font-mono text-[12px] tracking-[0.3em] uppercase text-accent mb-[18px] text-center">Search the collection</div>
-    <h1 class="font-display font-normal text-[52px] leading-[1.05] m-0 tracking-[-0.01em] text-center">Search the petitions</h1>
+{% include "partials/page_hero.html" with kicker="Search the Collection" title="Search the Records" deck="Search the records for a person, place, subject, or year." %}
 
-    <form action="{% url 'petitions:search' %}" method="get" class="flex mt-[38px] border-b-2 border-ink">
-        <input name="q" id="search-input" value="{{ q }}" autofocus placeholder="a petitioner, a place, a subject, a year&hellip;" class="flex-1 font-serif text-[26px] py-2 pb-4 border-none bg-transparent text-ink outline-none" />
-    </form>
+<div class="max-w-[1440px] mx-auto w-full px-6 sm:px-10 lg:px-14 pt-12 pb-20 flex-1">
+    <div class="grid grid-cols-1 lg:grid-cols-[260px_minmax(0,1fr)] gap-10 lg:gap-14">
+        <aside class="lg:border-r lg:border-rule lg:pr-8" aria-labelledby="search-filters-heading">
+            <h2 id="search-filters-heading" class="font-mono text-[13px] tracking-[0.14em] uppercase text-ink border-b border-ink pb-3">Narrow search</h2>
+            <p class="text-[16px] leading-[1.55] text-ink-soft mt-4 mb-5">Filter by a subject, a locality, or both. Filters can be used with or without search terms.</p>
+            <form action="{% url 'petitions:search' %}" method="get">
+                {% if q %}<input type="hidden" name="q" value="{{ q }}" />{% endif %}
 
-    {% if q %}
-    {# Results #}
-    <div>
-        <div class="flex justify-between items-baseline mt-6 mb-1">
-            <span class="font-mono text-[12px] tracking-[0.12em] uppercase text-ink">{{ results|length }} result(s)</span>
-            <a href="{% url 'petitions:catalog' %}" class="font-mono text-[11px] tracking-[0.1em] uppercase text-accent">Open in the Catalog &rarr;</a>
-        </div>
+                <label for="search-subject" class="block font-mono text-[13px] tracking-[0.1em] uppercase text-meta mb-2">Subject</label>
+                <select name="subject" id="search-subject" class="site-select w-full font-serif">
+                    <option value="">All subjects</option>
+                    {% for subject in subjects %}
+                    <option value="{{ subject.slug }}"{% if current_subject == subject.slug %} selected{% endif %}>{{ subject.name }} ({{ subject.c }})</option>
+                    {% endfor %}
+                </select>
 
-        {% for petition in results %}
-        <div class="flex gap-6 py-[22px] border-b border-rule-light hover:bg-paper-deep">
-            <div class="flex-none w-[52px] font-mono text-[14px] text-accent pt-[3px]">{% if petition.date %}{{ petition.date.year }}{% endif %}</div>
-            <div class="flex-1">
-                <div class="font-serif text-[20px] font-bold leading-[1.25]">{{ petition.title }} <span class="font-normal italic text-meta-2">&middot; {{ petition.get_petition_type_display }}</span></div>
-                {% if petition.description %}
-                <div class="text-[16px] leading-[1.5] text-ink-soft mt-[7px]" style="text-wrap:pretty">{{ petition.description|truncatewords:40 }}</div>
+                <label for="search-locality" class="block font-mono text-[13px] tracking-[0.1em] uppercase text-meta mt-5 mb-2">Locality</label>
+                <select name="loc" id="search-locality" class="site-select w-full font-serif">
+                    <option value="">All localities</option>
+                    {% for locality in localities %}
+                    <option value="{{ locality.locality_raw }}"{% if current_loc == locality.locality_raw %} selected{% endif %}>{{ locality.locality_raw }} ({{ locality.c }})</option>
+                    {% endfor %}
+                </select>
+
+                <button type="submit" class="w-full min-h-[46px] mt-5 px-5 py-3 bg-accent border border-accent text-paper font-mono text-[13px] tracking-[0.1em] uppercase cursor-pointer hover:bg-blue-deep">Apply filters</button>
+                {% if current_subject or current_loc %}
+                <a href="{% url 'petitions:search' %}{% if q %}?q={{ q|urlencode }}{% endif %}" class="block text-center min-h-[44px] py-3 font-mono text-[13px] tracking-[0.08em] uppercase text-accent">Clear filters</a>
                 {% endif %}
-                <div class="flex gap-5 items-center mt-[11px]">
-                    {% if petition.locality_raw %}
-                    <span class="font-mono text-[11px] tracking-[0.08em] uppercase text-meta">{{ petition.locality_raw }}</span>
-                    {% endif %}
-                    {% if petition.permalink %}
-                    <a href="{{ petition.permalink }}" target="_blank" rel="noopener" class="font-mono text-[11px] tracking-[0.1em] uppercase text-accent">Original &rarr;</a>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-        {% empty %}
-        <div class="py-11 text-center italic text-[19px] text-meta">No petitions match that search. Try a place, a name, or a year.</div>
-        {% endfor %}
-    </div>
+            </form>
+        </aside>
 
-    {% else %}
-    {# Prompt #}
-    <div class="pt-10">
-        <div class="font-mono text-[11px] tracking-[0.18em] uppercase text-meta mb-[18px]">Try one of these</div>
-        <div class="flex flex-wrap gap-3">
-            {% for term in example_terms %}
-            <a href="?q={{ term }}" class="cursor-pointer font-mono text-[12px] tracking-[0.06em] py-[9px] px-4 border border-border bg-field text-ink-soft hover:bg-ink hover:text-paper hover:border-ink">{{ term }}</a>
-            {% endfor %}
+        <div>
+            <form action="{% url 'petitions:search' %}" method="get">
+                {% if current_subject %}<input type="hidden" name="subject" value="{{ current_subject }}" />{% endif %}
+                {% if current_loc %}<input type="hidden" name="loc" value="{{ current_loc }}" />{% endif %}
+                <label for="search-input" class="block font-mono text-[13px] tracking-[0.14em] uppercase text-ink mb-3">Search terms</label>
+                <div class="flex flex-col sm:flex-row gap-3 sm:gap-0">
+                    <input name="q" id="search-input" value="{{ q }}" autofocus placeholder="Peter Francisco, Augusta, 1781&hellip;" class="flex-1 min-w-0 min-h-[52px] font-serif text-[20px] sm:text-[22px] px-4 py-3 border border-border bg-field text-ink" />
+                    <button type="submit" class="min-h-[52px] px-7 py-3 bg-accent border border-accent text-paper font-mono text-[14px] tracking-[0.1em] uppercase cursor-pointer hover:bg-blue-deep">Search</button>
+                </div>
+                <p class="text-[16px] leading-[1.55] text-meta mt-3">Use ordinary word order. Searches such as <em>Peter Francisco</em> or <em>roads in Henrico</em> will find records containing all the important words.</p>
+            </form>
+
+            {% if has_search %}
+            {# Results #}
+            <div>
+                <div class="mt-8 mb-1">
+                    <span class="font-mono text-[13px] tracking-[0.1em] uppercase text-ink">{% if result_count > 100 %}First 100 of {% endif %}{{ result_count }} result{{ result_count|pluralize }}</span>
+                </div>
+
+                {% for petition in results %}
+                {% if petition.permalink %}
+                <a href="{{ petition.permalink }}" target="_blank" rel="noopener" data-search-row="available" aria-label="View {{ petition.title }} in the Library of Virginia online catalog (opens in a new tab)" class="catalog-row group text-accent grid grid-cols-[48px_1fr] sm:grid-cols-[58px_1fr_112px] gap-x-4 sm:gap-x-6 py-[22px] border-b border-rule-light items-start hover:bg-paper-deep transition-colors">
+                {% else %}
+                <div data-search-row="unavailable" class="grid grid-cols-[48px_1fr] sm:grid-cols-[58px_1fr_112px] gap-x-4 sm:gap-x-6 py-[22px] border-b border-rule-light items-start">
+                {% endif %}
+                    <div class="font-mono text-[15px] text-accent pt-[3px]">{% if petition.date %}{{ petition.date.year }}{% endif %}</div>
+                    <div class="flex-1 min-w-0">
+                        <div class="catalog-row__title font-serif text-[20px] font-bold leading-[1.3]">{{ petition.title }} <span class="font-normal text-meta-2">&middot; {{ petition.get_petition_type_display }}</span></div>
+                        {% if petition.description %}
+                        <div class="text-[18px] leading-[1.6] text-ink-soft mt-[7px]" style="text-wrap:pretty">{{ petition.description|truncatewords:40 }}</div>
+                        {% endif %}
+                        {% if petition.locality_raw %}
+                        <div class="font-mono text-[13px] tracking-[0.06em] uppercase text-meta mt-[11px]">{{ petition.locality_raw }}</div>
+                        {% endif %}
+                    </div>
+                    {% if not petition.permalink %}
+                    <div class="col-start-2 sm:col-start-auto justify-self-start sm:justify-self-end mt-3 sm:mt-0 px-3 py-2 border border-accent bg-card font-mono text-[12px] tracking-[0.1em] uppercase text-accent whitespace-nowrap">Coming Soon</div>
+                    {% endif %}
+                {% if petition.permalink %}</a>{% else %}</div>{% endif %}
+                {% empty %}
+                <div class="py-11 text-center italic text-[19px] text-meta">No records match that search. Try fewer words or broaden the subject and locality filters.</div>
+                {% endfor %}
+            </div>
+
+            {% else %}
+            {# Prompt #}
+            <div class="pt-10">
+                <div class="font-mono text-[13px] tracking-[0.14em] uppercase text-meta mb-[18px]">Try one of these</div>
+                <div class="flex flex-wrap gap-3">
+                    {% for term in example_terms %}
+                    <a href="?q={{ term|urlencode }}" class="cursor-pointer font-mono text-[14px] tracking-[0.04em] py-3 px-4 border border-border bg-field text-ink-soft hover:bg-ink hover:text-paper hover:border-ink">{{ term }}</a>
+                    {% endfor %}
+                </div>
+                <p class="text-[17px] leading-[1.6] text-ink-soft mt-[34px] max-w-[620px]" style="text-wrap:pretty">Search runs across names, localities, subjects, descriptions, and record years &mdash; or <a href="{% url 'petitions:catalog' %}" class="text-accent border-b border-accent-border">browse the full collection in the Catalogue</a>.</p>
+            </div>
+            {% endif %}
         </div>
-        <p class="text-[17px] leading-[1.6] text-ink-soft mt-[34px] max-w-[560px]" style="text-wrap:pretty">Search runs across petitioners, localities, subjects, and descriptions &mdash; or <a href="{% url 'petitions:catalog' %}" class="text-accent border-b border-accent-border">browse the full collection in the Catalog</a>.</p>
     </div>
-    {% endif %}
 </div>
 {% endblock %}

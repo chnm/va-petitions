@@ -1,136 +1,132 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}The Catalog — By Petition{% endblock %}
+{% block title %}The Catalogue — Records of Revolution{% endblock %}
 
 {% block content %}
-<div class="max-w-[1280px] mx-auto pt-[54px] px-14 pb-7">
-    <div class="font-mono text-[12px] tracking-[0.3em] uppercase text-accent mb-[18px]">Petitions &middot; 1773 &ndash; 1861</div>
-    <h1 class="font-display font-normal text-[52px] leading-[1.05] m-0 tracking-[-0.01em]">The Catalog</h1>
-    <p class="text-[18px] leading-[1.6] text-ink-soft max-w-[640px] mt-[18px]" style="text-wrap:pretty">Browse the full collection of petitions and pension declarations. Filter by type, subject, or locality; sort by date or petitioner; follow any record to its original at Virginia Memory.</p>
-</div>
+{% include "partials/page_hero.html" with kicker="Legal Records · Revolutionary Virginia" title="The Catalogue" deck="Browse the collection of petitions, pension declarations, and related legal records. Filter by type, subject, or locality; sort by date or name; follow any available record through the Library of Virginia online catalog." %}
 
-<div class="grid grid-cols-[288px_1fr] gap-14 max-w-[1280px] mx-auto px-14 pt-[14px] pb-16 items-start">
+<div class="grid grid-cols-1 lg:grid-cols-[288px_1fr] gap-10 lg:gap-14 max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-14 py-12 lg:py-16 items-start">
 
     {# Left rail: filters #}
     <div>
         <div class="flex justify-between items-baseline border-b border-ink pb-[10px] mb-[18px]">
-            <span class="font-mono text-[11px] tracking-[0.2em] uppercase text-ink">Refine</span>
-            <a href="{% url 'petitions:catalog' %}" class="font-mono text-[10.5px] tracking-[0.12em] uppercase text-accent">Clear</a>
+            <span class="font-mono text-[13px] tracking-[0.16em] uppercase text-ink">Refine</span>
+            <a href="{% url 'petitions:catalog' %}#catalog-results" class="font-mono text-[13px] tracking-[0.1em] uppercase text-accent">Clear</a>
         </div>
 
         {# Type facets #}
-        <div class="font-mono text-[11px] tracking-[0.18em] uppercase text-meta mb-[6px]">Type</div>
+        <div class="font-mono text-[13px] tracking-[0.14em] uppercase text-meta mb-[6px]">Type</div>
         {% with total=type_counts.legislative|default:0|add:type_counts.pension|default:0 %}
-        <a href="{% url 'petitions:catalog' %}{% if current_subject %}?subject={{ current_subject }}{% endif %}{% if current_loc %}&loc={{ current_loc }}{% endif %}"
-           class="flex justify-between w-full py-[7px] font-mono text-[12px] tracking-[0.03em] hover:text-ink {% if not current_type %}text-ink font-bold{% else %}text-meta{% endif %}">
+        <a href="?{% if current_subject %}subject={{ current_subject }}{% endif %}{% if current_loc %}{% if current_subject %}&amp;{% endif %}loc={{ current_loc }}{% endif %}#catalog-results"
+           class="flex justify-between w-full py-[9px] font-mono text-[15px] tracking-[0.02em] hover:text-ink {% if not current_type %}text-ink font-bold{% else %}text-meta{% endif %}">
             <span>All types</span><span>{{ total_count }}</span>
         </a>
         {% endwith %}
         {% for key, label in petition_types %}
-        <a href="?type={{ key }}{% if current_subject %}&subject={{ current_subject }}{% endif %}{% if current_loc %}&loc={{ current_loc }}{% endif %}"
-           class="flex justify-between w-full py-[7px] font-mono text-[12px] tracking-[0.03em] hover:text-ink {% if current_type == key %}text-ink font-bold{% else %}text-meta{% endif %}">
+        <a href="?type={{ key }}{% if current_subject %}&amp;subject={{ current_subject }}{% endif %}{% if current_loc %}&amp;loc={{ current_loc }}{% endif %}#catalog-results"
+           class="flex justify-between w-full py-[9px] font-mono text-[15px] tracking-[0.02em] hover:text-ink {% if current_type == key %}text-ink font-bold{% else %}text-meta{% endif %}">
             <span>{{ label }}</span><span>{{ type_counts|default_if_none:"{}"|dictsort:key }}</span>
         </a>
         {% endfor %}
-        <a href="?type=legislative{% if current_subject %}&subject={{ current_subject }}{% endif %}{% if current_loc %}&loc={{ current_loc }}{% endif %}"
-           class="flex justify-between w-full py-[7px] font-mono text-[12px] tracking-[0.03em] hover:text-ink {% if current_type == 'legislative' %}text-ink font-bold{% else %}text-meta{% endif %}">
+        <a href="?type=legislative{% if current_subject %}&amp;subject={{ current_subject }}{% endif %}{% if current_loc %}&amp;loc={{ current_loc }}{% endif %}#catalog-results"
+           class="flex justify-between w-full py-[9px] font-mono text-[15px] tracking-[0.02em] hover:text-ink {% if current_type == 'legislative' %}text-ink font-bold{% else %}text-meta{% endif %}">
             <span>Legislative petition</span><span>{{ type_counts.legislative|default:"0" }}</span>
         </a>
-        <a href="?type=pension{% if current_subject %}&subject={{ current_subject }}{% endif %}{% if current_loc %}&loc={{ current_loc }}{% endif %}"
-           class="flex justify-between w-full py-[7px] font-mono text-[12px] tracking-[0.03em] hover:text-ink {% if current_type == 'pension' %}text-ink font-bold{% else %}text-meta{% endif %}">
+        <a href="?type=pension{% if current_subject %}&amp;subject={{ current_subject }}{% endif %}{% if current_loc %}&amp;loc={{ current_loc }}{% endif %}#catalog-results"
+           class="flex justify-between w-full py-[9px] font-mono text-[15px] tracking-[0.02em] hover:text-ink {% if current_type == 'pension' %}text-ink font-bold{% else %}text-meta{% endif %}">
             <span>Pension declaration</span><span>{{ type_counts.pension|default:"0" }}</span>
         </a>
 
         {# Subject select #}
-        <div class="font-mono text-[11px] tracking-[0.18em] uppercase text-meta mt-[26px] mb-2">Subject</div>
-        <div class="relative">
-            <select onchange="applyFilter('subject', this.value)" class="w-full font-mono text-[12px] py-[11px] pl-3 pr-[30px] border border-border bg-field text-ink outline-none cursor-pointer appearance-none">
+        <div class="font-mono text-[13px] tracking-[0.14em] uppercase text-meta mt-[26px] mb-2">Subject</div>
+        <div>
+            <select onchange="applyFilter('subject', this.value)" class="site-select w-full font-mono">
                 <option value="">All subjects ({{ total_count }})</option>
                 {% for s in subjects_with_counts %}
                 <option value="{{ s.slug }}"{% if current_subject == s.slug %} selected{% endif %}>{{ s.name }} ({{ s.c }})</option>
                 {% endfor %}
             </select>
-            <span class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none font-mono text-[11px] text-meta">&#9662;</span>
         </div>
 
         {# Locality select #}
-        <div class="font-mono text-[11px] tracking-[0.18em] uppercase text-meta mt-[26px] mb-2">Locality</div>
-        <div class="relative">
-            <select onchange="applyFilter('loc', this.value)" class="w-full font-mono text-[12px] py-[11px] pl-3 pr-[30px] border border-border bg-field text-ink outline-none cursor-pointer appearance-none">
+        <div class="font-mono text-[13px] tracking-[0.14em] uppercase text-meta mt-[26px] mb-2">Locality</div>
+        <div>
+            <select onchange="applyFilter('loc', this.value)" class="site-select w-full font-mono">
                 <option value="">All localities ({{ total_count }})</option>
                 {% for l in localities %}
                 <option value="{{ l.locality_raw }}"{% if current_loc == l.locality_raw %} selected{% endif %}>{{ l.locality_raw }} ({{ l.c }})</option>
                 {% endfor %}
             </select>
-            <span class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none font-mono text-[11px] text-meta">&#9662;</span>
         </div>
     </div>
 
     {# Right column: table #}
-    <div>
+    <div id="catalog-results" class="scroll-mt-6">
         <div class="flex justify-between items-baseline mb-[2px]">
-            <span class="font-mono text-[12px] tracking-[0.12em] uppercase text-ink">
+            <span class="font-mono text-[13px] tracking-[0.1em] uppercase text-ink">
                 Showing {{ page.start_index }}–{{ page.end_index }} of {{ filtered_count }}
             </span>
-            <span class="font-mono text-[11px] tracking-[0.1em] uppercase text-meta">Click a heading to sort</span>
+            <span class="font-mono text-[13px] tracking-[0.08em] uppercase text-meta">Click a heading to sort</span>
         </div>
 
         {# Column headers #}
         {% with base_qs=query_string %}
-        <div class="grid grid-cols-[62px_1fr_78px] gap-5 border-b border-ink py-3 pb-[11px] items-end">
-            <a href="?{{ base_qs }}{% if base_qs %}&{% endif %}sort=date&dir={% if current_sort == 'date' and current_dir == 'asc' %}desc{% else %}asc{% endif %}"
-               class="text-left font-mono text-[11px] tracking-[0.12em] uppercase text-ink">Date{% if current_sort == 'date' %}{% if current_dir == 'asc' %} &uarr;{% else %} &darr;{% endif %}{% endif %}</a>
-            <a href="?{{ base_qs }}{% if base_qs %}&{% endif %}sort=name&dir={% if current_sort == 'name' and current_dir == 'asc' %}desc{% else %}asc{% endif %}"
-               class="text-left font-mono text-[11px] tracking-[0.12em] uppercase text-ink">Petition{% if current_sort == 'name' %}{% if current_dir == 'asc' %} &uarr;{% else %} &darr;{% endif %}{% endif %}</a>
-            <span></span>
+        <div class="grid grid-cols-[52px_1fr] sm:grid-cols-[62px_1fr_112px] gap-x-4 sm:gap-x-5 border-b border-ink py-3 pb-[11px] items-end">
+            <a href="?{{ base_qs }}{% if base_qs %}&amp;{% endif %}sort=date&amp;dir={% if current_sort == 'date' and current_dir == 'asc' %}desc{% else %}asc{% endif %}#catalog-results"
+               class="text-left font-mono text-[13px] tracking-[0.1em] uppercase text-ink py-1">Date{% if current_sort == 'date' %}{% if current_dir == 'asc' %} &uarr;{% else %} &darr;{% endif %}{% endif %}</a>
+            <a href="?{{ base_qs }}{% if base_qs %}&amp;{% endif %}sort=name&amp;dir={% if current_sort == 'name' and current_dir == 'asc' %}desc{% else %}asc{% endif %}#catalog-results"
+               class="text-left font-mono text-[13px] tracking-[0.1em] uppercase text-ink py-1">Petition{% if current_sort == 'name' %}{% if current_dir == 'asc' %} &uarr;{% else %} &darr;{% endif %}{% endif %}</a>
+            <span class="hidden sm:block"></span>
         </div>
         {% endwith %}
 
         {# Table rows #}
         {% for petition in page %}
-        <div class="grid grid-cols-[62px_1fr_78px] gap-5 py-5 border-b border-rule-light items-start hover:bg-paper-deep">
-            <div class="font-mono text-[14px] text-accent pt-[2px]">{% if petition.date %}{{ petition.date.year }}{% endif %}</div>
+        {% if petition.permalink %}
+        <a href="{{ petition.permalink }}" target="_blank" rel="noopener" data-catalog-row="available" aria-label="View {{ petition.title }} in the Library of Virginia online catalog (opens in a new tab)" class="catalog-row group text-accent grid grid-cols-[52px_1fr] sm:grid-cols-[62px_1fr_112px] gap-x-4 sm:gap-x-5 py-5 border-b border-rule-light items-start hover:bg-paper-deep transition-colors">
+        {% else %}
+        <div data-catalog-row="unavailable" class="grid grid-cols-[52px_1fr] sm:grid-cols-[62px_1fr_112px] gap-x-4 sm:gap-x-5 py-5 border-b border-rule-light items-start">
+        {% endif %}
+            <div class="font-mono text-[15px] text-accent pt-[2px]">{% if petition.date %}{{ petition.date.year }}{% endif %}</div>
             <div>
-                <div class="font-serif text-[19px] font-bold leading-[1.25]">{{ petition.title }} <span class="font-normal italic text-meta-2">&middot; {{ petition.get_petition_type_display }}</span></div>
+                <div class="catalog-row__title font-serif text-[20px] font-bold leading-[1.3]">{{ petition.title }} <span class="font-normal text-meta-2">&middot; {{ petition.get_petition_type_display }}</span></div>
                 {% if petition.description %}
-                <div class="text-[15.5px] leading-[1.5] text-ink-soft mt-[6px]" style="text-wrap:pretty">{{ petition.description|truncatewords:40 }}</div>
+                <div class="text-[17px] leading-[1.6] text-ink-soft mt-[7px]" style="text-wrap:pretty">{{ petition.description|truncatewords:40 }}</div>
                 {% endif %}
                 {% if petition.locality_raw %}
                 <div class="flex gap-4 mt-2">
-                    <span class="font-mono text-[11px] tracking-[0.06em] uppercase text-meta">{{ petition.locality_raw }}</span>
+                    <span class="font-mono text-[13px] tracking-[0.06em] uppercase text-meta">{{ petition.locality_raw }}</span>
                 </div>
                 {% endif %}
             </div>
-            <div class="pt-[2px]">
-                {% if petition.permalink %}
-                <a href="{{ petition.permalink }}" target="_blank" rel="noopener" class="font-mono text-[11px] tracking-[0.08em] uppercase text-accent">View &rarr;</a>
-                {% endif %}
-            </div>
-        </div>
+            {% if not petition.permalink %}
+            <div class="col-start-2 sm:col-start-auto justify-self-start sm:justify-self-end mt-3 sm:mt-0 px-3 py-2 border border-accent bg-card font-mono text-[12px] tracking-[0.1em] uppercase text-accent whitespace-nowrap">Coming Soon</div>
+            {% endif %}
+        {% if petition.permalink %}</a>{% else %}</div>{% endif %}
         {% empty %}
         <div class="py-12 text-center italic text-[18px] text-meta">No petitions match these filters.</div>
         {% endfor %}
 
         {# Pagination #}
         {% if page.has_other_pages %}
-        <div class="flex justify-center items-center gap-2 mt-8 font-mono text-[12px] tracking-[0.08em]">
+        <div class="flex justify-center items-center gap-2 mt-8 font-mono text-[14px] tracking-[0.06em]">
             {% if page.has_previous %}
-            <a href="?{{ query_string }}{% if query_string %}&{% endif %}page={{ page.previous_page_number }}" class="px-3 py-2 text-accent hover:bg-paper-deep">&larr; Prev</a>
+            <a href="?{{ query_string }}{% if query_string %}&amp;{% endif %}page={{ page.previous_page_number }}#catalog-results" class="px-3 py-2 text-accent hover:bg-paper-deep">&larr; Prev</a>
             {% endif %}
 
             {% for num in page.paginator.page_range %}
                 {% if num == page.number %}
                 <span class="px-3 py-2 text-ink font-bold">{{ num }}</span>
                 {% elif num == 1 or num == page.paginator.num_pages or num >= page.number|add:"-2" and num <= page.number|add:"2" %}
-                <a href="?{{ query_string }}{% if query_string %}&{% endif %}page={{ num }}" class="px-3 py-2 text-meta hover:text-ink hover:bg-paper-deep">{{ num }}</a>
+                <a href="?{{ query_string }}{% if query_string %}&amp;{% endif %}page={{ num }}#catalog-results" class="px-3 py-2 text-meta hover:text-ink hover:bg-paper-deep">{{ num }}</a>
                 {% elif num == page.number|add:"-3" or num == page.number|add:"3" %}
                 <span class="px-1 text-meta">&hellip;</span>
                 {% endif %}
             {% endfor %}
 
             {% if page.has_next %}
-            <a href="?{{ query_string }}{% if query_string %}&{% endif %}page={{ page.next_page_number }}" class="px-3 py-2 text-accent hover:bg-paper-deep">Next &rarr;</a>
+            <a href="?{{ query_string }}{% if query_string %}&amp;{% endif %}page={{ page.next_page_number }}#catalog-results" class="px-3 py-2 text-accent hover:bg-paper-deep">Next &rarr;</a>
             {% endif %}
         </div>
         {% endif %}
@@ -148,7 +144,8 @@ function applyFilter(key, val) {
     } else {
         params.delete(key);
     }
-    window.location.search = params.toString();
+    const query = params.toString();
+    window.location.href = `${window.location.pathname}${query ? `?${query}` : ''}#catalog-results`;
 }
 </script>
 {% endblock %}

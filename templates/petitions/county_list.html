@@ -1,14 +1,15 @@
 {% extends "base.html" %}
 
-{% block title %}Counties - Virginia Petitions{% endblock %}
+{% block title %}Counties — Records of Revolution{% endblock %}
 
 {% block content %}
-<h1 class="text-3xl font-bold mb-4">Counties</h1>
+{% include "partials/page_hero.html" with kicker="Browse by Place" title="Counties" deck="Find petitions through the modern counties associated with each Library of Virginia record." %}
 
-<form method="get" class="mb-6">
-    <label for="state" class="text-sm text-gray-600 mr-1">State:</label>
+<div class="max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-14 py-12 sm:py-16">
+<form method="get" class="mb-10 flex items-center gap-3 border-b border-rule pb-6">
+    <label for="state" class="font-mono text-[13px] tracking-[0.14em] uppercase text-meta">State</label>
     <select name="state" id="state" onchange="this.form.submit()"
-            class="border border-gray-300 rounded px-2 py-1 text-sm bg-white">
+            class="site-select">
         <option value="">All</option>
         <option value="VA" {% if current_state == "VA" %}selected{% endif %}>Virginia</option>
         <option value="WV" {% if current_state == "WV" %}selected{% endif %}>West Virginia</option>
@@ -17,12 +18,13 @@
     </select>
 </form>
 
-<ul class="columns-2 md:columns-3 gap-6 text-sm">
+<ul class="columns-1 sm:columns-2 lg:columns-4 gap-10">
     {% for county in counties %}
-    <li class="mb-1">
-        <a href="{% url 'petitions:county_detail' county.slug %}" class="text-red-800 hover:underline">{{ county }}</a>
-        <span class="text-gray-400 font-mono text-xs">({{ county.petition_count }})</span>
+    <li class="mb-3 break-inside-avoid border-b border-rule-light pb-2">
+        <a href="{% url 'petitions:county_detail' county.slug %}" class="text-[18px] text-accent hover:underline">{{ county }}</a>
+        <span class="text-meta font-mono text-[13px] ml-1">{{ county.petition_count }}</span>
     </li>
     {% endfor %}
 </ul>
+</div>
 {% endblock %}

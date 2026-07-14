@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}The Map — By Petition{% endblock %}
+{% block title %}The Map — Records of Revolution{% endblock %}
 
 {% block extra_head %}
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -9,20 +9,16 @@
 {% endblock %}
 
 {% block content %}
-<div class="max-w-[1280px] mx-auto pt-[54px] px-14 pb-7">
-    <div class="font-mono text-[12px] tracking-[0.3em] uppercase text-accent mb-[18px]">The Geography of Petition</div>
-    <h1 class="font-display font-normal text-[52px] leading-[1.05] m-0 tracking-[-0.01em]">The Map</h1>
-    <p class="text-[18px] leading-[1.6] text-ink-soft max-w-[660px] mt-[18px]" style="text-wrap:pretty">Petitions plotted to the counties they name, across Virginia and the lands that became West Virginia and Kentucky. Filter by subject and year, toggle historical county boundaries, or select a locality to read its petitions.</p>
-</div>
+{% include "partials/page_hero.html" with kicker="The Geography of the Records" title="The Map" deck="Records plotted to the counties they name, across Virginia and the lands that became West Virginia and Kentucky. Filter by subject and year, toggle historical county boundaries, or select a locality to explore its records." %}
 
 {# Filter bar #}
-<div class="max-w-[1280px] mx-auto px-14">
+<div class="max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-14 pt-12">
     <div class="border border-border bg-paper-alt px-6 py-[18px] flex flex-wrap items-center gap-x-10 gap-y-5">
 
         {# Subject #}
-        <label class="flex items-center gap-3">
-            <span class="font-mono text-[11px] tracking-[0.16em] uppercase text-meta">Subject</span>
-            <select id="subject-filter" class="font-serif text-[15px] text-ink bg-field border border-border rounded-[2px] pl-3 pr-8 py-[6px] cursor-pointer">
+        <label class="flex items-center gap-3 w-full sm:w-auto min-w-0">
+            <span class="font-mono text-[13px] tracking-[0.14em] uppercase text-meta">Subject</span>
+            <select id="subject-filter" class="site-select flex-1 sm:flex-none min-w-0 max-w-full font-serif">
                 <option value="">All subjects</option>
                 {% for s in subjects %}
                 <option value="{{ s.slug }}">{{ s.name }} ({{ s.count }})</option>
@@ -31,10 +27,10 @@
         </label>
 
         {# Year range #}
-        <div class="flex items-center gap-4">
-            <span class="font-mono text-[11px] tracking-[0.16em] uppercase text-meta">Years</span>
-            <span id="year-readout" class="font-mono text-[13px] text-accent font-bold w-[88px]">All years</span>
-            <div id="year-track" class="relative w-[220px] h-[24px] flex items-center">
+        <div class="flex flex-wrap items-center gap-x-4 gap-y-3 w-full md:w-auto">
+            <span class="font-mono text-[13px] tracking-[0.14em] uppercase text-meta">Years</span>
+            <span id="year-readout" class="font-mono text-[14px] text-accent font-bold w-[96px]">All years</span>
+            <div id="year-track" class="relative w-full sm:w-[220px] h-[28px] flex items-center">
                 <div class="absolute left-0 right-0 h-[4px] rounded bg-paper-deep-2"></div>
                 <div id="year-fill" class="absolute h-[4px] rounded bg-accent" style="left:0;width:100%"></div>
                 <input id="year-min" type="range" min="{{ year_min }}" max="{{ year_max }}" value="{{ year_min }}" step="1" class="dual-range" aria-label="Earliest year" />
@@ -44,20 +40,21 @@
 
         {# Historical boundaries #}
         <label class="flex items-center gap-[10px] cursor-pointer select-none">
-            <input id="boundary-check" type="checkbox" class="w-[15px] h-[15px]" style="accent-color:#7c3a2d" />
-            <span class="font-mono text-[11px] tracking-[0.12em] uppercase text-ink-soft">Historical boundaries</span>
-            <span id="boundary-year" class="font-mono text-[10px] tracking-[0.1em] uppercase text-meta"></span>
+            <input id="boundary-check" type="checkbox" class="w-5 h-5" style="accent-color:#26415c" />
+            <span class="font-mono text-[13px] tracking-[0.1em] uppercase text-ink-soft">Historical boundaries</span>
+            <span id="boundary-year" class="font-mono text-[12px] tracking-[0.08em] uppercase text-meta"></span>
         </label>
 
         {# Results + reset #}
-        <div class="ml-auto flex items-center gap-5">
-            <span id="result-count" class="font-mono text-[11px] tracking-[0.08em] uppercase text-meta"></span>
-            <button id="reset-filters" onclick="resetFilters()" class="hidden font-mono text-[11px] tracking-[0.12em] uppercase text-accent border-b border-accent-border pb-[2px] bg-transparent border-x-0 border-t-0 cursor-pointer p-0">Reset</button>
+        <div class="ml-auto flex flex-wrap items-center gap-5">
+            <button id="map-help-open" type="button" class="font-mono text-[13px] tracking-[0.08em] uppercase text-accent border-b border-accent pb-1 bg-transparent border-x-0 border-t-0 cursor-pointer p-1">How to use this map</button>
+            <span id="result-count" class="font-mono text-[13px] tracking-[0.06em] uppercase text-meta"></span>
+            <button id="reset-filters" onclick="resetFilters()" class="hidden font-mono text-[13px] tracking-[0.1em] uppercase text-accent border-b border-accent pb-1 bg-transparent border-x-0 border-t-0 cursor-pointer p-1">Reset</button>
         </div>
     </div>
 </div>
 
-<div class="grid grid-cols-[1fr_384px] gap-0 max-w-[1280px] mx-auto px-14 pt-[14px] pb-16 items-stretch">
+<div class="grid grid-cols-1 lg:grid-cols-[1fr_384px] gap-0 max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-14 pt-[14px] pb-16 items-stretch">
 
     {# Map canvas #}
     <div class="relative min-h-[640px] border border-border rounded-l-[2px]">
@@ -65,40 +62,72 @@
 
         {# Legend #}
         <div style="z-index:1000" class="absolute bottom-[18px] left-[18px] bg-[#f7f2e8] border border-border py-3 px-[14px]">
-            <div class="font-mono text-[10px] tracking-[0.14em] uppercase text-meta mb-2">Petitions per locality</div>
+            <div class="font-mono text-[12px] tracking-[0.12em] uppercase text-meta mb-2">Records per locality</div>
             <div class="flex items-center gap-[7px]">
                 <span class="w-[18px] h-3 border border-border" style="background:rgba(124,58,45,0.18)"></span>
                 <span class="w-[18px] h-3" style="background:rgba(124,58,45,0.42)"></span>
                 <span class="w-[18px] h-3" style="background:rgba(124,58,45,0.68)"></span>
                 <span class="w-[18px] h-3" style="background:rgba(124,58,45,0.95)"></span>
-                <span class="font-mono text-[11px] text-ink-soft ml-1">low &nbsp;&rarr;&nbsp; high</span>
+                <span class="font-mono text-[13px] text-ink-soft ml-1">low &nbsp;&rarr;&nbsp; high</span>
             </div>
         </div>
     </div>
 
     {# Right panel #}
-    <div class="border border-border border-l-0 bg-field py-6 px-6 pb-7 flex flex-col">
+    <div class="border border-border lg:border-l-0 bg-field py-6 px-6 pb-7 flex flex-col">
 
         {# Ranked list (default) #}
         <div id="panel-ranked">
-            <div class="flex justify-between items-baseline border-b border-ink pb-[11px] mb-[6px]">
-                <span class="font-mono text-[11px] tracking-[0.16em] uppercase text-ink">By county</span>
-                <span id="panel-stats" class="font-mono text-[11px] tracking-[0.08em] uppercase text-meta"></span>
+            <div class="border-b border-ink pb-[11px] mb-[6px]">
+                <div class="flex justify-between items-baseline gap-4">
+                    <span class="font-mono text-[13px] tracking-[0.14em] uppercase text-ink">Localities</span>
+                    <span id="panel-stats" class="font-mono text-[13px] tracking-[0.06em] uppercase text-meta"></span>
+                </div>
+                <label class="flex items-center justify-between gap-4 mt-3">
+                    <span class="font-mono text-[13px] tracking-[0.1em] uppercase text-meta">Sort by</span>
+                    <select id="locality-sort" class="site-select font-serif">
+                        <option value="count">Record count</option>
+                        <option value="name">Locality A&ndash;Z</option>
+                    </select>
+                </label>
             </div>
             <div id="ranked-list" class="max-h-[560px] overflow-auto -mx-2"></div>
         </div>
 
         {# Locality detail (when selected) #}
         <div id="panel-detail" class="hidden">
-            <button onclick="deselectLocality()" class="border-none bg-transparent cursor-pointer font-mono text-[11px] tracking-[0.12em] uppercase text-accent p-0 pb-[14px]">&larr; All localities</button>
+            <button onclick="deselectLocality()" class="border-none bg-transparent cursor-pointer font-mono text-[13px] tracking-[0.1em] uppercase text-accent p-1 pb-[14px]">&larr; All localities</button>
             <div class="border-t border-ink pt-4">
                 <h3 id="detail-name" class="font-display font-normal text-[26px] m-0 leading-[1.15]"></h3>
-                <div id="detail-count" class="font-mono text-[11px] tracking-[0.1em] uppercase text-meta mt-2"></div>
+                <div id="detail-count" class="font-mono text-[13px] tracking-[0.08em] uppercase text-meta mt-2"></div>
             </div>
             <div id="detail-records" class="max-h-[520px] overflow-auto mt-2"></div>
         </div>
     </div>
 </div>
+
+<dialog id="map-help-dialog" class="map-help-dialog" aria-labelledby="map-help-title">
+    <div class="bg-blue text-paper px-6 sm:px-10 py-6 sm:py-8">
+        <div class="flex items-start justify-between gap-6">
+            <div>
+                <div class="font-mono text-[13px] tracking-[0.16em] uppercase text-ochre mb-3">Map Guide</div>
+                <h2 id="map-help-title" class="font-display font-normal text-[34px] sm:text-[46px] leading-[1.02] m-0">How to Use This Map</h2>
+            </div>
+            <button id="map-help-close" type="button" aria-label="Close map guide" class="font-mono text-[24px] leading-[1] text-paper bg-transparent border-none cursor-pointer p-1">&times;</button>
+        </div>
+    </div>
+    <div class="px-6 sm:px-10 py-6 sm:py-8 text-[18px] leading-[1.6] text-ink-soft-2">
+        <ol class="m-0 pl-6 list-decimal">
+            <li class="mb-5"><strong class="text-ink">Explore localities.</strong> Larger, darker circles indicate more records. Select a circle or a locality in the right pane to see its records and links to the Library of Virginia online catalog.</li>
+            <li class="mb-5"><strong class="text-ink">Refine the records.</strong> Choose a subject or adjust either end of the year range. The map, counts, and locality list update together.</li>
+            <li class="mb-5"><strong class="text-ink">Sort the locality list.</strong> The right pane begins with the largest record count. Use the sort menu to arrange localities alphabetically.</li>
+            <li><strong class="text-ink">Compare historical boundaries.</strong> Turn on Historical boundaries to draw county lines for the final year in the selected range. The circles themselves represent the collection&rsquo;s modern locality assignments, so the overlay is a historical reference rather than a one-to-one match.</li>
+        </ol>
+        <form method="dialog" class="mt-8 border-t border-rule pt-6">
+            <button type="submit" class="font-mono text-[13px] tracking-[0.1em] uppercase text-paper bg-accent border border-accent cursor-pointer px-4 py-3">Return to the map</button>
+        </form>
+    </div>
+</dialog>
 {% endblock %}
 
 {% block extra_js %}
@@ -121,6 +150,7 @@ let boundaryLayer = null;
 let selectedCounty = null;     // slug
 let boundaryTimeout = null;
 let currentCounts = [];        // counts per county index, current filter
+let currentResultTotal = TOTAL;
 
 // ---- Map setup ----
 const map = L.map('map', { zoomControl: true }).setView([37.8, -79.5], 7);
@@ -136,7 +166,7 @@ const markers = COUNTIES.map((c, i) => {
         radius: 6, fillColor: '#7c3a2d', fillOpacity: 0.5,
         color: '#7c3a2d', weight: 1, opacity: 0.6
     });
-    marker.on('click', () => selectCounty(c.slug, c.name));
+    marker.on('click', () => selectCounty(c.slug, `${c.name}, ${c.state}`));
     return marker;
 });
 
@@ -183,6 +213,7 @@ function applyFilters() {
         for (const ci of p.c) counts[ci]++;
     }
     currentCounts = counts;
+    currentResultTotal = n;
 
     updateMarkers(counts);
     renderPanel(counts, n);
@@ -212,25 +243,30 @@ function updateMarkers(counts) {
 }
 
 function renderPanel(counts, n) {
+    const sortMode = document.getElementById('locality-sort').value;
     const rows = COUNTIES
         .map((c, i) => ({ c, count: counts[i] }))
-        .filter(r => r.count > 0)
-        .sort((a, b) => b.count - a.count);
+        .filter(r => r.count > 0);
+
+    rows.sort((a, b) => {
+        const byName = a.c.name.localeCompare(b.c.name);
+        return sortMode === 'name' ? byName : (b.count - a.count || byName);
+    });
 
     document.getElementById('panel-stats').textContent =
-        `${n.toLocaleString()} · ${rows.length} counties`;
+        `${n.toLocaleString()} · ${rows.length} localities`;
 
-    const maxCount = rows.length ? rows[0].count : 1;
+    const maxCount = Math.max(1, ...rows.map(row => row.count));
     let html = '';
     if (!rows.length) {
-        html = `<div class="py-8 px-2 font-serif text-[15px] text-meta">No petitions match these filters.</div>`;
+        html = `<div class="py-8 px-2 font-serif text-[17px] text-meta">No records match these filters.</div>`;
     }
     rows.forEach(({ c, count }) => {
         const w = ((count / maxCount) * 100).toFixed(0);
-        html += `<button onclick="selectCounty('${esc(c.slug)}','${esc(c.name).replace(/'/g, "\\'")}')" onmouseover="hoverMarker('${esc(c.slug)}')" onmouseout="unhoverMarker('${esc(c.slug)}')" class="block w-full text-left border-none bg-transparent cursor-pointer py-[11px] px-2 border-b border-paper-deep hover:bg-paper-deep">
+        html += `<button onclick="selectCounty('${esc(c.slug)}','${esc(`${c.name}, ${c.state}`).replace(/'/g, "\\'")}')" onmouseover="hoverMarker('${esc(c.slug)}')" onmouseout="unhoverMarker('${esc(c.slug)}')" class="block w-full text-left border-none bg-transparent cursor-pointer py-[11px] px-2 border-b border-paper-deep hover:bg-paper-deep">
             <div class="flex justify-between items-baseline">
-                <span class="font-serif text-[16px] text-ink">${esc(c.name)}</span>
-                <span class="font-mono text-[12px] text-accent">${count}</span>
+                <span class="font-serif text-[18px] text-ink">${esc(c.name)} <span class="font-mono text-[12px] tracking-[0.08em] uppercase text-meta">${esc(c.state)}</span></span>
+                <span class="font-mono text-[14px] text-accent">${count}</span>
             </div>
             <div class="h-1 bg-paper-deep mt-[7px]"><div class="h-1 bg-accent" style="width:${w}%"></div></div>
         </button>`;
@@ -291,25 +327,25 @@ function refreshDetail() {
         .then(r => r.json())
         .then(records => {
             document.getElementById('detail-count').textContent =
-                `${records.length} petition(s)`;
+                `${records.length} record(s)`;
             let html = '';
             if (!records.length) {
-                html = `<div class="py-6 font-serif text-[15px] text-meta">No petitions here match the current filters.</div>`;
+                html = `<div class="py-6 font-serif text-[17px] text-meta">No records here match the current filters.</div>`;
             }
             records.forEach(r => {
                 html += `<div class="py-4 border-b border-rule-light">
                     <div class="flex justify-between items-baseline gap-3">
-                        <span class="font-serif text-[16px] font-bold leading-[1.25]">${esc(r.title)}</span>
-                        <span class="font-mono text-[12px] text-accent flex-none">${r.year || ''}</span>
+                        <span class="font-serif text-[18px] font-bold leading-[1.3]">${esc(r.title)}</span>
+                        <span class="font-mono text-[14px] text-accent flex-none">${r.year || ''}</span>
                     </div>
-                    <div class="text-[14.5px] leading-[1.5] text-ink-soft mt-[6px]" style="text-wrap:pretty">${esc(r.description)}</div>
-                    ${r.permalink ? `<a href="${esc(r.permalink)}" target="_blank" rel="noopener" class="inline-block mt-[9px] font-mono text-[10.5px] tracking-[0.1em] uppercase text-accent border-b border-accent-border pb-[2px]">Original &rarr;</a>` : ''}
+                    <div class="text-[17px] leading-[1.6] text-ink-soft mt-[6px]" style="text-wrap:pretty">${esc(r.description)}</div>
+                    ${r.permalink ? `<a href="${esc(r.permalink)}" target="_blank" rel="noopener" aria-label="View in the Library of Virginia online catalog (opens in a new tab)" class="inline-block mt-[9px] font-mono text-[13px] tracking-[0.08em] uppercase text-accent border-b border-accent pb-1">Online catalog &rarr;</a>` : ''}
                 </div>`;
             });
             document.getElementById('detail-records').innerHTML = html;
         })
         .catch(e => {
-            document.getElementById('detail-count').textContent = 'Error loading petitions';
+            document.getElementById('detail-count').textContent = 'Error loading records';
             console.error('County fetch error:', e);
         });
 }
@@ -352,6 +388,20 @@ document.getElementById('boundary-check').addEventListener('change', function ()
 
 // ---- Events ----
 subjectSelect.addEventListener('change', applyFilters);
+document.getElementById('locality-sort').addEventListener('change', () => {
+    renderPanel(currentCounts, currentResultTotal);
+});
+
+const mapHelpDialog = document.getElementById('map-help-dialog');
+document.getElementById('map-help-open').addEventListener('click', () => {
+    mapHelpDialog.showModal();
+});
+document.getElementById('map-help-close').addEventListener('click', () => {
+    mapHelpDialog.close();
+});
+mapHelpDialog.addEventListener('click', event => {
+    if (event.target === mapHelpDialog) mapHelpDialog.close();
+});
 
 function onYearInput() {
     updateYearUI();
