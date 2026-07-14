@@ -1,18 +1,9 @@
 import csv
 
 from django.core.management.base import BaseCommand
-from django.utils.text import slugify
 
 from petitions import lva
 from petitions.models import County, Petition, Subject
-
-# Column index ranges (from the CSV header)
-VA_COUNTY_START = 23
-VA_COUNTY_END = 157  # exclusive; includes "Unknown" at 156
-SUBJECT_START = 158
-SUBJECT_END = 198  # exclusive; includes "Unknown" at 197
-WV_COUNTY_START = 201
-# WV goes to end of row
 
 
 class Command(BaseCommand):
@@ -32,137 +23,58 @@ class Command(BaseCommand):
             County.objects.all().delete()
             Subject.objects.all().delete()
 
-        with open(options['csv_file'], newline='', encoding='utf-8') as f:
-            reader = csv.reader(f)
-            headers = next(reader)
+        with open(
+            options['csv_file'],
+            newline='',
+            encoding='utf-8-sig',
+        ) as csv_file:
+            reader = csv.DictReader(csv_file)
+            if reader.fieldnames is None:
+                self.stdout.write(self.style.WARNING('The CSV file is empty.'))
+                return
 
-            # Extract column names for counties and subjects
-            va_county_cols = headers[VA_COUNTY_START:VA_COUNTY_END]
-            subject_cols = headers[SUBJECT_START:SUBJECT_END]
-            wv_county_cols = headers[WV_COUNTY_START:]
-
-            # Pre-create county and subject records
-            va_counties = self._ensure_counties(va_county_cols, 'VA')
-            wv_counties = self._ensure_counties(wv_county_cols, 'WV')
-            subjects = self._ensure_subjects(subject_cols)
+            lva.ensure_counties_and_subjects(reader.fieldnames)
+            county_lookup, subject_lookup = lva.build_lookups()
 
             imported = 0
             skipped = 0
             for row in reader:
-                if not row or not row[0].strip():
-                    continue
-
-                try:
-                    serial = int(row[0])
-                except ValueError:
+                serial = self._parse_serial(row.get('Serial'))
+                if serial is None or Petition.objects.filter(serial=serial).exists():
                     skipped += 1
                     continue
 
-                if Petition.objects.filter(serial=serial).exists():
-                    skipped += 1
-                    continue
-
-                petition = self._create_petition(row, serial)
-                self._assign_counties(petition, row, va_counties, va_county_cols,
-                                      VA_COUNTY_START)
-                self._assign_counties(petition, row, wv_counties, wv_county_cols,
-                                      WV_COUNTY_START)
-                self._assign_ky_pa_counties(petition, row)
-                self._assign_subjects(petition, row, subjects, subject_cols,
-                                      SUBJECT_START)
+                petition = Petition.objects.create(
+                    serial=serial,
+                    mms_id=self._value(row, 'MMS ID'),
+                    rosetta_ie=self._value(row, 'Rosetta IE'),
+                    title=self._value(row, 'Title'),
+                    petition_type=lva.parse_type(row.get('Type')),
+                    date=lva.parse_date(row.get('Creation Date')),
+                    description=lva.clean_description(row.get('Description')),
+                    locality_raw=self._value(row, 'Locality'),
+                    permalink=self._value(row, 'permalink'),
+                )
+                lva.assign_relations(
+                    petition,
+                    row,
+                    county_lookup,
+                    subject_lookup,
+                    replace=False,
+                )
                 imported += 1
 
-            self.stdout.write(self.style.SUCCESS(
-                f'Imported {imported} petitions, skipped {skipped}'
-            ))
+        self.stdout.write(self.style.SUCCESS(
+            f'Imported {imported} petitions, skipped {skipped}'
+        ))
 
-    def _ensure_counties(self, col_names, state):
-        counties = {}
-        for name in col_names:
-            name = name.strip()
-            if not name or name == 'Unknown':
-                continue
-            slug = slugify(f"{state}-{name}")
-            county, _ = County.objects.get_or_create(
-                slug=slug,
-                defaults={'name': name, 'state': state},
-            )
-            counties[name] = county
-        return counties
+    @staticmethod
+    def _parse_serial(raw):
+        try:
+            return int(str(raw or '').strip())
+        except ValueError:
+            return None
 
-    def _ensure_subjects(self, col_names):
-        subjects = {}
-        for name in col_names:
-            name = name.strip()
-            if not name or name == 'Unknown':
-                continue
-            slug = slugify(name)
-            subject, _ = Subject.objects.get_or_create(
-                slug=slug,
-                defaults={'name': name},
-            )
-            subjects[name] = subject
-        return subjects
-
-    def _create_petition(self, row, serial):
-        parsed_date = lva.parse_date(row[6] if len(row) > 6 else '')
-        petition_type = lva.parse_type(row[14] if len(row) > 14 else '')
-        description = lva.clean_description(row[7] if len(row) > 7 else '')
-
-        return Petition.objects.create(
-            serial=serial,
-            mms_id=row[1].strip() if len(row) > 1 else '',
-            rosetta_ie=row[2].strip() if len(row) > 2 else '',
-            title=row[3].strip() if len(row) > 3 else '',
-            petition_type=petition_type,
-            date=parsed_date,
-            description=description,
-            locality_raw=row[8].strip() if len(row) > 8 else '',
-            permalink=row[13].strip() if len(row) > 13 else '',
-        )
-
-    def _assign_counties(self, petition, row, county_map, col_names, start_idx):
-        for i, name in enumerate(col_names):
-            name = name.strip()
-            idx = start_idx + i
-            if idx < len(row) and row[idx].strip().lower() == 'yes':
-                county = county_map.get(name)
-                if county:
-                    petition.counties.add(county)
-
-    def _assign_ky_pa_counties(self, petition, row):
-        # KY_ModernLocality is column 19, PA is 20
-        for col_idx, state in [(19, 'KY'), (20, 'PA')]:
-            if col_idx >= len(row):
-                continue
-            value = row[col_idx].strip()
-            if not value or value == 'Kentucky Counties':
-                continue
-            for name in value.split(';'):
-                name = name.strip()
-                if not name:
-                    continue
-                slug = slugify(f"{state}-{name}")
-                county, _ = County.objects.get_or_create(
-                    slug=slug,
-                    defaults={'name': name, 'state': state},
-                )
-                petition.counties.add(county)
-
-    def _assign_subjects(self, petition, row, subject_map, col_names, start_idx):
-        for i, name in enumerate(col_names):
-            name = name.strip()
-            idx = start_idx + i
-            if idx < len(row) and row[idx].strip().lower() == 'yes':
-                subject = subject_map.get(name)
-                if subject:
-                    petition.subjects.add(subject)
-
-        # Also parse the semicolon-delimited Subject column (index 15)
-        if len(row) > 15:
-            for subj_name in row[15].split(';'):
-                subj_name = subj_name.strip()
-                if subj_name and subj_name != 'Unknown':
-                    subject = subject_map.get(subj_name)
-                    if subject:
-                        petition.subjects.add(subject)
+    @staticmethod
+    def _value(row, column):
+        return str(row.get(column) or '').strip()
