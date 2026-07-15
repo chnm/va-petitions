@@ -19,9 +19,10 @@ class LvaTransformTests(TestCase):
         self.assertIsNone(lva.parse_date('1820-99-04'))
         self.assertEqual(
             lva.clean_description(
-                'Keep this; Petitions to the General Assembly were boilerplate'
+                'Keep petitioner&#39;s claim &amp; loss; '
+                'Petitions to the General Assembly were boilerplate'
             ),
-            'Keep this',
+            "Keep petitioner's claim & loss",
         )
 
 

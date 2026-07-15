@@ -5,6 +5,7 @@ parsing for bulk/initial loads) and the django-import-export
 ``PetitionResource`` (admin uploads, edit-or-append keyed on Serial).
 """
 from datetime import date as _date
+from html import unescape
 
 from django.utils.text import slugify
 
@@ -33,8 +34,8 @@ def parse_date(raw):
 
 
 def clean_description(raw):
-    """Drop the boilerplate paragraph that trails every description."""
-    desc = (raw or '').strip()
+    """Decode source entities and drop the trailing boilerplate paragraph."""
+    desc = unescape((raw or '').strip())
     if BOILERPLATE_MARKER in desc:
         desc = desc[:desc.index(BOILERPLATE_MARKER)].rstrip('; ')
     return desc
