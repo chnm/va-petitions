@@ -59,7 +59,6 @@ def ensure_counties_and_subjects(headers):
     fresh database. Safe to call repeatedly — uses get_or_create.
 
     ``headers`` should be the full list of column names from the spreadsheet.
-    Returns (county_lookup, subject_lookup) ready for assign_relations.
     """
     # The spreadsheet layout (column ranges match import_petitions command):
     VA_COUNTY_START = 23
