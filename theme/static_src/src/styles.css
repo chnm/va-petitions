@@ -6,6 +6,7 @@
     --font-serif: 'Libre Caslon Text', Georgia, serif;
     --font-display: 'Libre Caslon Display', Georgia, serif;
     --font-mono: 'Courier Prime', 'Courier New', monospace;
+    --font-ui: 'Inter', system-ui, sans-serif;
 
     --color-paper: #f3ede1;
     --color-card: #f6f0e4;
@@ -24,7 +25,6 @@
     --color-accent: #26415c;
     --color-accent-border: #9fb0c1;
     --color-rust: #7c3a2d;
-    --color-rust-border: #c8a99f;
     --color-blue: #26415c;
     --color-blue-deep: #1b2b3a;
     --color-blue-text: #c3ccd4;
@@ -38,7 +38,6 @@
     --color-footer-text-2: #c3ccd4;
     --color-footer-label: #8296aa;
     --color-footer-rule: #33475c;
-    --color-footer-strong: #c3ccd4;
 }
 
 ::selection {
@@ -54,6 +53,98 @@
 .bg-blue :focus-visible,
 .bg-blue-deep :focus-visible {
     outline-color: var(--color-ochre-light);
+}
+
+/* ---- Homepage document hero ---- */
+.home-hero {
+    position: relative;
+    isolation: isolate;
+    min-height: clamp(680px, 84vh, 720px);
+    overflow: hidden;
+    background: var(--color-blue-deep);
+}
+
+.home-hero__image {
+    position: absolute;
+    z-index: 0;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 68%;
+    object-fit: cover;
+    object-position: center top;
+    filter: grayscale(1) contrast(1.08);
+}
+
+.home-hero__wash,
+.home-hero__gradient {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.home-hero__wash {
+    z-index: 1;
+    background: var(--color-blue);
+    opacity: 0.78;
+    mix-blend-mode: multiply;
+}
+
+.home-hero__gradient {
+    z-index: 2;
+    background: linear-gradient(
+        to bottom,
+        rgba(27, 43, 58, 0.04) 0%,
+        rgba(27, 43, 58, 0.18) 30%,
+        rgba(27, 43, 58, 0.78) 54%,
+        #1b2b3a 76%,
+        #1b2b3a 100%
+    );
+}
+
+.home-hero__content {
+    position: relative;
+    z-index: 3;
+    min-height: clamp(680px, 84vh, 720px);
+    padding-top: clamp(18rem, 56vw, 24rem);
+    padding-bottom: 3rem;
+}
+
+.home-hero :focus-visible {
+    outline-color: var(--color-ochre-light);
+}
+
+@media (min-width: 64rem) {
+    .home-hero {
+        min-height: clamp(580px, 68vh, 640px);
+    }
+
+    .home-hero__image {
+        height: 100%;
+        object-position: right 34%;
+    }
+
+    .home-hero__wash {
+        opacity: 0.82;
+    }
+
+    .home-hero__gradient {
+        background: linear-gradient(
+            to right,
+            #1b2b3a 0%,
+            rgba(27, 43, 58, 0.98) 32%,
+            rgba(27, 43, 58, 0.68) 58%,
+            rgba(27, 43, 58, 0.16) 100%
+        );
+    }
+
+    .home-hero__content {
+        display: flex;
+        align-items: center;
+        min-height: clamp(580px, 68vh, 640px);
+        padding-top: 4.5rem;
+        padding-bottom: 4.5rem;
+    }
 }
 
 /* ---- Cross-browser native select controls ----

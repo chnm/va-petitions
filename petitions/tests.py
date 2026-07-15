@@ -206,6 +206,21 @@ class PetitionViewTests(TestCase):
         self.assertContains(response, 'id="search-subject"')
         self.assertContains(response, 'id="search-locality"')
 
+    def test_search_can_be_reset(self):
+        search_url = reverse('petitions:search')
+
+        initial_response = self.client.get(search_url)
+        results_response = self.client.get(
+            search_url,
+            {'q': 'roads', 'subject': self.subject.slug},
+        )
+
+        self.assertContains(initial_response, 'data-search-reset="inactive"')
+        self.assertContains(initial_response, 'disabled aria-disabled="true"')
+        self.assertContains(results_response, f'href="{search_url}"')
+        self.assertContains(results_response, 'data-search-reset="active"')
+        self.assertNotContains(results_response, 'data-search-reset="inactive"')
+
     def test_search_filters_by_subject_and_locality_without_terms(self):
         response = self.client.get(
             reverse('petitions:search'),

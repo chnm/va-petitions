@@ -8,9 +8,6 @@
 <header class="w-full bg-blue text-center text-paper">
     <div class="max-w-[1440px] mx-auto py-20 sm:py-24 lg:py-[104px] px-6 sm:px-14">
       <div class="max-w-[860px] mx-auto">
-        {% if essay.kicker %}
-        <div class="font-mono text-[13px] tracking-[0.18em] uppercase text-ochre mb-8 sm:mb-9">{{ essay.kicker }}</div>
-        {% endif %}
         <h1 class="font-display text-[48px] sm:text-[64px] lg:text-[72px] leading-[1.02] text-paper mb-7 sm:mb-8">{{ essay.title }}</h1>
         {% if essay.deck %}
         <p class="font-serif text-[20px] sm:text-[24px] leading-[1.55] text-blue-text max-w-[720px] mx-auto">{{ essay.deck }}</p>
@@ -39,13 +36,10 @@
 {# About the author #}
 {% if essay.author_bio %}
 <section class="border-t border-rule">
-    <div class="max-w-[680px] mx-auto px-6 py-14 flex gap-8 items-start">
-        <div class="shrink-0 w-[76px] h-[76px] rounded-full bg-paper-deep-2 flex items-center justify-center font-display text-[28px] text-meta">{{ essay.author_name|cut:"["|cut:"]"|first|default:"A" }}</div>
-        <div>
-            <div class="font-mono text-[13px] tracking-[0.16em] uppercase text-meta mb-3">About the Author</div>
-            <div class="font-display text-[25px] text-ink mb-2">{{ essay.author_name|default:"Author" }}</div>
-            <p class="font-serif text-[17px] leading-[1.6] text-ink-soft max-w-[560px]">{{ essay.author_bio }}</p>
-        </div>
+    <div class="max-w-[680px] mx-auto px-6 py-14">
+        <div class="font-ui text-[12px] font-medium tracking-[0.1em] uppercase text-meta mb-3">About the Author</div>
+        <div class="font-display text-[25px] text-ink mb-2">{{ essay.author_name|default:"Author" }}</div>
+        <p class="font-serif text-[17px] leading-[1.6] text-ink-soft max-w-[560px]">{{ essay.author_bio }}</p>
     </div>
 </section>
 {% endif %}

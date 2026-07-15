@@ -1,5 +1,6 @@
 from django.test import TestCase
 from django.urls import reverse
+from django.utils import timezone
 
 from petitions.models import Petition
 
@@ -48,6 +49,12 @@ class EssayLinkTests(TestCase):
 
 
 class HomeStatsTests(TestCase):
+    def test_footer_uses_the_current_year(self):
+        response = self.client.get(reverse('pages:home'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, f'&copy; {timezone.localdate().year}')
+
     def test_navigation_about_link_targets_homepage_section(self):
         response = self.client.get(reverse('pages:introduction'))
 
@@ -78,13 +85,9 @@ class HomeStatsTests(TestCase):
         self.assertEqual(response.context['locality_count'], 2)
         self.assertContains(response, 'Named Localities')
 
-    def test_home_hero_features_a_catalogued_document_image(self):
+    def test_home_hero_features_a_document_image(self):
         response = self.client.get(reverse('pages:home'))
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'dissenters-petition-1776.webp')
-        self.assertContains(
-            response,
-            'alma9917811905405756',
-        )
         self.assertContains(response, 'First page of a handwritten 1776 petition')

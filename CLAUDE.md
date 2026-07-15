@@ -68,10 +68,10 @@ The map view (`/map/`) uses Leaflet with CARTO tiles. A filter bar above the map
 - `ink` #221d16 (primary text), `ink-soft` #574d3f, `ink-soft-2` #3f382d
 - `meta` #6f6555 (accessible metadata on paper), `accent` / `blue` #26415c (links, active states, structural fields)
 - `blue-deep` #1b2b3a (footer), `blue-text` #c3ccd4, `blue-text-muted` #9fb0c1
-- `rust` #7c3a2d (petition voice and true emphasis), `rust-border` #c8a99f
+- `rust` #7c3a2d (petition voice and true emphasis)
 - `ochre` #c9a86a and `ochre-light` #e4c58a (labels and dividers on blue)
 - `rule` #d9cfb9 (decorative dividers), `border` #8a7f6c (input and panel boundaries), `field` #fbf8f0 (input fills)
-- Footer colors: `footer-text`, `footer-label`, `footer-rule`, `footer-strong`
+- Footer colors: `footer-text`, `footer-label`, `footer-rule`
 
 ### Layout
 - Primary content max-width: 1440px, with narrower prose measures inside that frame

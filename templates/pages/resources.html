@@ -7,9 +7,6 @@
 <header class="w-full bg-blue text-paper">
   <div class="max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-14 py-20 sm:py-24">
     <div class="max-w-[920px]">
-        {% if page.kicker %}
-        <div class="font-mono text-[13px] tracking-[0.18em] uppercase text-ochre mb-7">{{ page.kicker }}</div>
-        {% endif %}
         <h1 class="font-display text-[48px] sm:text-[64px] leading-[1.03] text-paper mb-7">{% if page %}{{ page.title }}{% else %}Educational Resources{% endif %}</h1>
         {% if page.intro %}
         <div class="font-serif text-blue-text text-[19px] sm:text-[22px] leading-[1.55] [&_a]:text-ochre-light [&_a]:underline [&_a]:underline-offset-[4px] [&_a]:decoration-blue-label-light [&_a]:decoration-[1px] [&_a:hover]:decoration-2">{{ page.intro_html }}</div>
@@ -34,7 +31,7 @@
                 <div class="font-mono text-[13px] tracking-[0.14em] uppercase text-accent mb-4">{{ r.get_category_display }}</div>
                 <h2 class="font-display text-[28px] leading-[1.12] text-ink mb-4 group-hover:text-accent transition-colors">{{ r.title }}</h2>
                 <p class="font-serif text-[18px] leading-[1.5] text-ink-soft mb-7">{{ r.description }}</p>
-                <div class="font-mono text-[13px] tracking-[0.1em] uppercase text-accent">{{ r.link_text }} <span class="inline-block transition-transform group-hover:translate-x-1">&rarr;</span></div>
+                <div class="font-ui text-[12px] font-medium tracking-[0.08em] uppercase text-accent">{{ r.link_text }} <span class="inline-block transition-transform group-hover:translate-x-1">&rarr;</span></div>
             </div>
         </a>
         {% endfor %}

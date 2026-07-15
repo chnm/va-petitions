@@ -7,7 +7,7 @@
     <title>{% block title %}Records of Revolution{% endblock %}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Libre+Caslon+Display&family=Libre+Caslon+Text:ital,wght@0,400;0,700;1,400&family=Courier+Prime:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Inter:wght@400;500;600&family=Libre+Caslon+Display&family=Libre+Caslon+Text:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
     {% tailwind_css %}
     {% block extra_head %}{% endblock %}
 </head>
@@ -24,10 +24,9 @@
             <a href="{% url 'pages:home' %}">
                 <div class="flex items-center gap-4">
                     <div class="font-display text-[30px] sm:text-[34px] leading-none tracking-[-0.015em] text-ink">Records of <span style="color: #7c3a2d;">Revolution</span></div>
-                    <!-- <div class="hidden sm:block w-12 h-px bg-accent" aria-hidden="true"></div> -->
                 </div>
             </a>
-            <nav aria-label="Primary navigation" class="flex flex-wrap gap-x-5 gap-y-3 sm:gap-x-8 font-mono text-[14px] tracking-[0.1em] uppercase text-ink-soft">
+            <nav aria-label="Primary navigation" class="flex flex-wrap gap-x-5 gap-y-3 sm:gap-x-8 font-ui text-[13px] font-medium tracking-[0.08em] uppercase text-ink-soft">
                 <a class="inline-flex items-center min-h-[40px] hover:text-accent{% if nav_active == 'introduction' %} text-accent border-b border-accent{% endif %}" href="{% url 'pages:introduction' %}">Introduction</a>
                 <a class="inline-flex items-center min-h-[40px] hover:text-accent{% if nav_active == 'catalog' %} text-accent border-b border-accent{% endif %}" href="{% url 'petitions:catalog' %}">The Catalogue</a>
                 <a class="inline-flex items-center min-h-[40px] hover:text-accent{% if nav_active == 'map' %} text-accent border-b border-accent{% endif %}" href="{% url 'petitions:map' %}">Map</a>
@@ -54,7 +53,7 @@
                     <a href="https://rrchnm.org" target="_blank" rel="noopener" class="inline-block"><img src="{% static 'img/chnm-logo.png' %}" alt="Roy Rosenzweig Center for History and New Media" class="h-[36px] w-auto block" /></a>
                     <a href="https://www.gmu.edu" target="_blank" rel="noopener" class="inline-block"><img src="{% static 'img/gmu-logo.png' %}" alt="George Mason University" class="h-[42px] w-auto block" /></a>
                     <a href="https://www.lva.virginia.gov/" target="_blank" rel="noopener" class="inline-block">
-                        <img src="{% static 'img/logo_stack_rev.svg' %}" alt="Library of Virginia" class="block w-[160px] max-w-full h-auto" />
+                        <img src="{% static 'img/logo_stack_rev.svg' %}" alt="Library of Virginia" class="block h-[42px] w-auto max-w-full" />
                     </a>
                     <a href="https://www.lva.virginia.gov/" target="_blank" rel="noopener" class="relative block w-[170px] h-[60px] overflow-hidden" aria-label="Virginia 250">
                         <span aria-hidden="true">
@@ -64,8 +63,7 @@
                 </div>
             </div>
             <div class="border-t border-footer-rule mt-10 pt-5 flex justify-between flex-wrap gap-3 font-mono text-[12px] tracking-[0.1em] uppercase text-footer-label">
-                <span>&copy; 2026 Roy Rosenzweig Center for History and New Media &middot; George Mason University</span>
-                <span>Records and online catalog: Library of Virginia</span>
+                <span>&copy; {% now "Y" %} Developed in collaboration between the Library of Virginia and the Roy Rosenzweig Center for History and New Media at George Mason University</span>
             </div>
         </div>
     </footer>

@@ -4,44 +4,44 @@
 {% block title %}The Catalogue — Records of Revolution{% endblock %}
 
 {% block content %}
-{% include "partials/page_hero.html" with kicker="Legal Records · Revolutionary Virginia" title="The Catalogue" deck="Browse the collection of petitions, pension declarations, and related legal records. Filter by type, subject, or locality; sort by date or name; follow any available record through the Library of Virginia online catalog." %}
+{% include "partials/page_hero.html" with title="The Catalogue" deck="Browse the collection of petitions, pension declarations, and related legal records. Filter by type, subject, or locality; sort by date or name; follow any available record through the Library of Virginia online catalog." %}
 
 <div class="grid grid-cols-1 lg:grid-cols-[288px_1fr] gap-10 lg:gap-14 max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-14 py-12 lg:py-16 items-start">
 
     {# Left rail: filters #}
     <div>
         <div class="flex justify-between items-baseline border-b border-ink pb-[10px] mb-[18px]">
-            <span class="font-mono text-[13px] tracking-[0.16em] uppercase text-ink">Refine</span>
-            <a href="{% url 'petitions:catalog' %}#catalog-results" class="font-mono text-[13px] tracking-[0.1em] uppercase text-accent">Clear</a>
+            <span class="font-ui text-[12px] font-medium tracking-[0.1em] uppercase text-ink">Refine</span>
+            <a href="{% url 'petitions:catalog' %}#catalog-results" class="font-ui text-[12px] font-medium tracking-[0.08em] uppercase text-accent">Clear</a>
         </div>
 
         {# Type facets #}
-        <div class="font-mono text-[13px] tracking-[0.14em] uppercase text-meta mb-[6px]">Type</div>
+        <div class="font-ui text-[12px] font-medium tracking-[0.08em] uppercase text-meta mb-[6px]">Type</div>
         {% with total=type_counts.legislative|default:0|add:type_counts.pension|default:0 %}
         <a href="?{% if current_subject %}subject={{ current_subject }}{% endif %}{% if current_loc %}{% if current_subject %}&amp;{% endif %}loc={{ current_loc }}{% endif %}#catalog-results"
-           class="flex justify-between w-full py-[9px] font-mono text-[15px] tracking-[0.02em] hover:text-ink {% if not current_type %}text-ink font-bold{% else %}text-meta{% endif %}">
+           class="flex justify-between w-full py-[9px] font-ui text-[14px] hover:text-ink {% if not current_type %}text-ink font-semibold{% else %}text-meta{% endif %}">
             <span>All types</span><span>{{ total_count }}</span>
         </a>
         {% endwith %}
         {% for key, label in petition_types %}
         <a href="?type={{ key }}{% if current_subject %}&amp;subject={{ current_subject }}{% endif %}{% if current_loc %}&amp;loc={{ current_loc }}{% endif %}#catalog-results"
-           class="flex justify-between w-full py-[9px] font-mono text-[15px] tracking-[0.02em] hover:text-ink {% if current_type == key %}text-ink font-bold{% else %}text-meta{% endif %}">
+           class="flex justify-between w-full py-[9px] font-ui text-[14px] hover:text-ink {% if current_type == key %}text-ink font-semibold{% else %}text-meta{% endif %}">
             <span>{{ label }}</span><span>{{ type_counts|default_if_none:"{}"|dictsort:key }}</span>
         </a>
         {% endfor %}
         <a href="?type=legislative{% if current_subject %}&amp;subject={{ current_subject }}{% endif %}{% if current_loc %}&amp;loc={{ current_loc }}{% endif %}#catalog-results"
-           class="flex justify-between w-full py-[9px] font-mono text-[15px] tracking-[0.02em] hover:text-ink {% if current_type == 'legislative' %}text-ink font-bold{% else %}text-meta{% endif %}">
+           class="flex justify-between w-full py-[9px] font-ui text-[14px] hover:text-ink {% if current_type == 'legislative' %}text-ink font-semibold{% else %}text-meta{% endif %}">
             <span>Legislative petition</span><span>{{ type_counts.legislative|default:"0" }}</span>
         </a>
         <a href="?type=pension{% if current_subject %}&amp;subject={{ current_subject }}{% endif %}{% if current_loc %}&amp;loc={{ current_loc }}{% endif %}#catalog-results"
-           class="flex justify-between w-full py-[9px] font-mono text-[15px] tracking-[0.02em] hover:text-ink {% if current_type == 'pension' %}text-ink font-bold{% else %}text-meta{% endif %}">
+           class="flex justify-between w-full py-[9px] font-ui text-[14px] hover:text-ink {% if current_type == 'pension' %}text-ink font-semibold{% else %}text-meta{% endif %}">
             <span>Pension declaration</span><span>{{ type_counts.pension|default:"0" }}</span>
         </a>
 
         {# Subject select #}
-        <div class="font-mono text-[13px] tracking-[0.14em] uppercase text-meta mt-[26px] mb-2">Subject</div>
+        <div class="font-ui text-[12px] font-medium tracking-[0.08em] uppercase text-meta mt-[26px] mb-2">Subject</div>
         <div>
-            <select onchange="applyFilter('subject', this.value)" class="site-select w-full font-mono">
+            <select onchange="applyFilter('subject', this.value)" class="site-select w-full font-ui">
                 <option value="">All subjects ({{ total_count }})</option>
                 {% for s in subjects_with_counts %}
                 <option value="{{ s.slug }}"{% if current_subject == s.slug %} selected{% endif %}>{{ s.name }} ({{ s.c }})</option>
@@ -50,9 +50,9 @@
         </div>
 
         {# Locality select #}
-        <div class="font-mono text-[13px] tracking-[0.14em] uppercase text-meta mt-[26px] mb-2">Locality</div>
+        <div class="font-ui text-[12px] font-medium tracking-[0.08em] uppercase text-meta mt-[26px] mb-2">Locality</div>
         <div>
-            <select onchange="applyFilter('loc', this.value)" class="site-select w-full font-mono">
+            <select onchange="applyFilter('loc', this.value)" class="site-select w-full font-ui">
                 <option value="">All localities ({{ total_count }})</option>
                 {% for l in localities %}
                 <option value="{{ l.locality_raw }}"{% if current_loc == l.locality_raw %} selected{% endif %}>{{ l.locality_raw }} ({{ l.c }})</option>
@@ -67,16 +67,16 @@
             <span class="font-mono text-[13px] tracking-[0.1em] uppercase text-ink">
                 Showing {{ page.start_index }}–{{ page.end_index }} of {{ filtered_count }}
             </span>
-            <span class="font-mono text-[13px] tracking-[0.08em] uppercase text-meta">Click a heading to sort</span>
+            <span class="font-ui text-[12px] font-medium tracking-[0.06em] uppercase text-meta">Click a heading to sort</span>
         </div>
 
         {# Column headers #}
         {% with base_qs=query_string %}
         <div class="grid grid-cols-[52px_1fr] sm:grid-cols-[62px_1fr_112px] gap-x-4 sm:gap-x-5 border-b border-ink py-3 pb-[11px] items-end">
             <a href="?{{ base_qs }}{% if base_qs %}&amp;{% endif %}sort=date&amp;dir={% if current_sort == 'date' and current_dir == 'asc' %}desc{% else %}asc{% endif %}#catalog-results"
-               class="text-left font-mono text-[13px] tracking-[0.1em] uppercase text-ink py-1">Date{% if current_sort == 'date' %}{% if current_dir == 'asc' %} &uarr;{% else %} &darr;{% endif %}{% endif %}</a>
+               class="text-left font-ui text-[12px] font-medium tracking-[0.08em] uppercase text-ink py-1">Date{% if current_sort == 'date' %}{% if current_dir == 'asc' %} &uarr;{% else %} &darr;{% endif %}{% endif %}</a>
             <a href="?{{ base_qs }}{% if base_qs %}&amp;{% endif %}sort=name&amp;dir={% if current_sort == 'name' and current_dir == 'asc' %}desc{% else %}asc{% endif %}#catalog-results"
-               class="text-left font-mono text-[13px] tracking-[0.1em] uppercase text-ink py-1">Petition{% if current_sort == 'name' %}{% if current_dir == 'asc' %} &uarr;{% else %} &darr;{% endif %}{% endif %}</a>
+               class="text-left font-ui text-[12px] font-medium tracking-[0.08em] uppercase text-ink py-1">Petition{% if current_sort == 'name' %}{% if current_dir == 'asc' %} &uarr;{% else %} &darr;{% endif %}{% endif %}</a>
             <span class="hidden sm:block"></span>
         </div>
         {% endwith %}
@@ -110,7 +110,7 @@
 
         {# Pagination #}
         {% if page.has_other_pages %}
-        <div class="flex justify-center items-center gap-2 mt-8 font-mono text-[14px] tracking-[0.06em]">
+        <div class="flex justify-center items-center gap-2 mt-8 font-ui text-[13px] font-medium tracking-[0.02em]">
             {% if page.has_previous %}
             <a href="?{{ query_string }}{% if query_string %}&amp;{% endif %}page={{ page.previous_page_number }}#catalog-results" class="px-3 py-2 text-accent hover:bg-paper-deep">&larr; Prev</a>
             {% endif %}

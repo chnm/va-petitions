@@ -3,35 +3,35 @@
 {% block title %}Search — Records of Revolution{% endblock %}
 
 {% block content %}
-{% include "partials/page_hero.html" with kicker="Search the Collection" title="Search the Records" deck="Search the records for a person, place, subject, or year." %}
+{% include "partials/page_hero.html" with title="Search the Records" deck="Search the records for a person, place, subject, or year." %}
 
 <div class="max-w-[1440px] mx-auto w-full px-6 sm:px-10 lg:px-14 pt-12 pb-20 flex-1">
     <div class="grid grid-cols-1 lg:grid-cols-[260px_minmax(0,1fr)] gap-10 lg:gap-14">
         <aside class="lg:border-r lg:border-rule lg:pr-8" aria-labelledby="search-filters-heading">
-            <h2 id="search-filters-heading" class="font-mono text-[13px] tracking-[0.14em] uppercase text-ink border-b border-ink pb-3">Narrow search</h2>
+            <h2 id="search-filters-heading" class="font-ui text-[12px] font-medium tracking-[0.1em] uppercase text-ink border-b border-ink pb-3">Narrow search</h2>
             <p class="text-[16px] leading-[1.55] text-ink-soft mt-4 mb-5">Filter by a subject, a locality, or both. Filters can be used with or without search terms.</p>
             <form action="{% url 'petitions:search' %}" method="get">
                 {% if q %}<input type="hidden" name="q" value="{{ q }}" />{% endif %}
 
-                <label for="search-subject" class="block font-mono text-[13px] tracking-[0.1em] uppercase text-meta mb-2">Subject</label>
-                <select name="subject" id="search-subject" class="site-select w-full font-serif">
+                <label for="search-subject" class="block font-ui text-[12px] font-medium tracking-[0.08em] uppercase text-meta mb-2">Subject</label>
+                <select name="subject" id="search-subject" class="site-select w-full font-ui">
                     <option value="">All subjects</option>
                     {% for subject in subjects %}
                     <option value="{{ subject.slug }}"{% if current_subject == subject.slug %} selected{% endif %}>{{ subject.name }} ({{ subject.c }})</option>
                     {% endfor %}
                 </select>
 
-                <label for="search-locality" class="block font-mono text-[13px] tracking-[0.1em] uppercase text-meta mt-5 mb-2">Locality</label>
-                <select name="loc" id="search-locality" class="site-select w-full font-serif">
+                <label for="search-locality" class="block font-ui text-[12px] font-medium tracking-[0.08em] uppercase text-meta mt-5 mb-2">Locality</label>
+                <select name="loc" id="search-locality" class="site-select w-full font-ui">
                     <option value="">All localities</option>
                     {% for locality in localities %}
                     <option value="{{ locality.locality_raw }}"{% if current_loc == locality.locality_raw %} selected{% endif %}>{{ locality.locality_raw }} ({{ locality.c }})</option>
                     {% endfor %}
                 </select>
 
-                <button type="submit" class="w-full min-h-[46px] mt-5 px-5 py-3 bg-accent border border-accent text-paper font-mono text-[13px] tracking-[0.1em] uppercase cursor-pointer hover:bg-blue-deep">Apply filters</button>
+                <button type="submit" class="w-full min-h-[46px] mt-5 px-5 py-3 bg-accent border border-accent text-paper font-ui text-[12px] font-medium tracking-[0.08em] uppercase cursor-pointer hover:bg-blue-deep">Apply filters</button>
                 {% if current_subject or current_loc %}
-                <a href="{% url 'petitions:search' %}{% if q %}?q={{ q|urlencode }}{% endif %}" class="block text-center min-h-[44px] py-3 font-mono text-[13px] tracking-[0.08em] uppercase text-accent">Clear filters</a>
+                <a href="{% url 'petitions:search' %}{% if q %}?q={{ q|urlencode }}{% endif %}" class="block text-center min-h-[44px] py-3 font-ui text-[12px] font-medium tracking-[0.08em] uppercase text-accent">Clear filters</a>
                 {% endif %}
             </form>
         </aside>
@@ -40,12 +40,17 @@
             <form action="{% url 'petitions:search' %}" method="get">
                 {% if current_subject %}<input type="hidden" name="subject" value="{{ current_subject }}" />{% endif %}
                 {% if current_loc %}<input type="hidden" name="loc" value="{{ current_loc }}" />{% endif %}
-                <label for="search-input" class="block font-mono text-[13px] tracking-[0.14em] uppercase text-ink mb-3">Search terms</label>
+                <label for="search-input" class="block font-ui text-[12px] font-medium tracking-[0.1em] uppercase text-ink mb-3">Search terms</label>
                 <div class="flex flex-col sm:flex-row gap-3 sm:gap-0">
                     <input name="q" id="search-input" value="{{ q }}" autofocus placeholder="Peter Francisco, Augusta, 1781&hellip;" class="flex-1 min-w-0 min-h-[52px] font-serif text-[20px] sm:text-[22px] px-4 py-3 border border-border bg-field text-ink" />
-                    <button type="submit" class="min-h-[52px] px-7 py-3 bg-accent border border-accent text-paper font-mono text-[14px] tracking-[0.1em] uppercase cursor-pointer hover:bg-blue-deep">Search</button>
+                    <button type="submit" class="min-h-[52px] px-7 py-3 bg-accent border border-accent text-paper font-ui text-[13px] font-medium tracking-[0.08em] uppercase cursor-pointer hover:bg-blue-deep">Search</button>
+                    {% if has_search %}
+                    <a href="{% url 'petitions:search' %}" data-search-reset="active" class="min-h-[52px] sm:ml-3 px-5 py-3 inline-flex items-center justify-center border border-border bg-field text-accent font-ui text-[13px] font-medium tracking-[0.08em] uppercase hover:bg-paper-deep">Reset</a>
+                    {% else %}
+                    <button type="button" data-search-reset="inactive" disabled aria-disabled="true" class="min-h-[52px] sm:ml-3 px-5 py-3 inline-flex items-center justify-center border border-rule bg-paper-deep text-meta font-ui text-[13px] font-medium tracking-[0.08em] uppercase cursor-not-allowed opacity-60">Reset</button>
+                    {% endif %}
                 </div>
-                <p class="text-[16px] leading-[1.55] text-meta mt-3">Use ordinary word order. Searches such as <em>Peter Francisco</em> or <em>roads in Henrico</em> will find records containing all the important words.</p>
+                <p class="text-[16px] leading-[1.55] text-meta mt-3">Search supports natural language queries and will primarily target metadata fields, not full text or transcriptions.</p>
             </form>
 
             {% if has_search %}
@@ -83,10 +88,10 @@
             {% else %}
             {# Prompt #}
             <div class="pt-10">
-                <div class="font-mono text-[13px] tracking-[0.14em] uppercase text-meta mb-[18px]">Try one of these</div>
+                <div class="font-ui text-[12px] font-medium tracking-[0.1em] uppercase text-meta mb-[18px]">Try one of these</div>
                 <div class="flex flex-wrap gap-3">
                     {% for term in example_terms %}
-                    <a href="?q={{ term|urlencode }}" class="cursor-pointer font-mono text-[14px] tracking-[0.04em] py-3 px-4 border border-border bg-field text-ink-soft hover:bg-ink hover:text-paper hover:border-ink">{{ term }}</a>
+                    <a href="?q={{ term|urlencode }}" class="cursor-pointer font-ui text-[13px] font-medium py-3 px-4 border border-border bg-field text-ink-soft hover:bg-ink hover:text-paper hover:border-ink">{{ term }}</a>
                     {% endfor %}
                 </div>
                 <p class="text-[17px] leading-[1.6] text-ink-soft mt-[34px] max-w-[620px]" style="text-wrap:pretty">Search runs across names, localities, subjects, descriptions, and record years &mdash; or <a href="{% url 'petitions:catalog' %}" class="text-accent border-b border-accent-border">browse the full collection in the Catalogue</a>.</p>
