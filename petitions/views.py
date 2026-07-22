@@ -1,4 +1,5 @@
 import json
+import re
 
 from django.core.paginator import Paginator
 from django.db.models import Count, Q
@@ -9,6 +10,11 @@ from .models import County, Petition, Subject
 
 THEME_LABELS = dict(Petition.THEME_CHOICES)
 PER_PAGE = 50
+SEARCH_STOP_WORDS = {
+    'a', 'about', 'an', 'and', 'are', 'by', 'document', 'documents', 'find',
+    'for', 'from', 'in', 'me', 'of', 'on', 'record', 'records', 'show', 'the',
+    'to', 'with',
+}
 
 
 def catalog(request):
@@ -92,6 +98,7 @@ def map_view(request):
 
     county_list = [{
         'name': c.name,
+        'state': c.state,
         'slug': c.slug,
         'lat': c.latitude,
         'lng': c.longitude,
@@ -166,22 +173,62 @@ def map_county_detail(request, slug):
 
 def search_view(request):
     q = request.GET.get('q', '').strip()
+    subject_slug = request.GET.get('subject', '').strip()
+    locality = request.GET.get('loc', '').strip()
+    has_search = bool(q or subject_slug or locality)
     results = []
-    if q:
-        results = Petition.objects.filter(
-            Q(title__icontains=q) |
-            Q(description__icontains=q) |
-            Q(locality_raw__icontains=q) |
-            Q(subjects__name__icontains=q)
-        ).distinct().prefetch_related('subjects').order_by('date')[:100]
+    result_count = 0
+    if has_search:
+        matches = Petition.objects.all()
+        if subject_slug:
+            matches = matches.filter(subjects__slug=subject_slug)
+        if locality:
+            matches = matches.filter(locality_raw=locality)
+        if q:
+            terms = re.findall(r"[\w]+(?:['’][\w]+)?", q, flags=re.UNICODE)
+            meaningful_terms = [
+                term for term in terms if term.casefold() not in SEARCH_STOP_WORDS
+            ]
+            # A query made entirely of common words should still be searchable.
+            terms = meaningful_terms or terms
+
+            for term in terms:
+                term_filter = (
+                    Q(title__icontains=term) |
+                    Q(description__icontains=term) |
+                    Q(locality_raw__icontains=term) |
+                    Q(subjects__name__icontains=term)
+                )
+                if term.isdigit() and len(term) == 4:
+                    term_filter |= Q(date__year=int(term))
+                matches = matches.filter(term_filter)
+
+        matches = matches.distinct().order_by('date', 'serial')
+        result_count = matches.count()
+        results = matches.prefetch_related('subjects')[:100]
 
     example_terms = ['manumission', 'pension', 'Henrico', 'divorce', 'bridge', 'militia']
+    subjects = Subject.objects.annotate(
+        c=Count('petitions')
+    ).filter(c__gt=0).order_by('name')
+    localities = (
+        Petition.objects.exclude(locality_raw='')
+        .values('locality_raw')
+        .annotate(c=Count('id'))
+        .order_by('locality_raw')
+    )
 
     return render(request, 'petitions/search.html', {
         'nav_active': 'search',
         'q': q,
         'results': results,
+        'result_count': result_count,
+        'has_search': has_search,
         'example_terms': example_terms,
+        'subjects': subjects,
+        'localities': localities,
+        'current_subject': subject_slug,
+        'current_loc': locality,
     })
 
 

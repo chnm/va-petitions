@@ -1,0 +1,16 @@
+<header class="w-full bg-blue text-paper">
+    <div class="max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-14 py-12 sm:py-16">
+        <div class="max-w-[920px]{% if centered %} mx-auto text-center{% endif %}">
+            {% if kicker %}
+            <div class="font-mono text-[13px] tracking-[0.18em] uppercase text-ochre mb-6">{{ kicker }}</div>
+            {% endif %}
+            <h1 class="font-display font-normal text-[46px] sm:text-[60px] lg:text-[68px] leading-[1.03] text-paper m-0 tracking-[-0.01em]">{{ title }}</h1>
+            {% if deck %}
+            <p class="font-serif text-[18px] sm:text-[21px] leading-[1.55] text-blue-text max-w-[760px] mt-6{% if centered %} mx-auto{% endif %}" style="text-wrap:pretty">{{ deck }}</p>
+            {% endif %}
+            {% if rule %}
+            <div class="w-16 h-px bg-ochre mt-10{% if centered %} mx-auto{% endif %}"></div>
+            {% endif %}
+        </div>
+    </div>
+</header>

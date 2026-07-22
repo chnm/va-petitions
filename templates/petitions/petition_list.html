@@ -1,15 +1,17 @@
 {% extends "base.html" %}
 
-{% block title %}Petitions - Virginia Petitions{% endblock %}
+{% block title %}Records — Records of Revolution{% endblock %}
 
 {% block content %}
-<h1 class="text-3xl font-bold mb-4">Petitions</h1>
+{% include "partials/page_hero.html" with kicker="The Collection" title="Records" deck="Browse legislative petitions, Revolutionary War pension declarations, and related legal records." %}
+
+<div class="max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-14 py-12 sm:py-16">
 
 <form method="get" class="flex flex-wrap gap-4 items-center mb-6">
     <div>
-        <label for="type" class="text-sm text-gray-600 mr-1">Type:</label>
+        <label for="type" class="font-mono text-[13px] tracking-[0.12em] uppercase text-meta mr-2">Type</label>
         <select name="type" id="type" onchange="this.form.submit()"
-                class="border border-gray-300 rounded px-2 py-1 text-sm bg-white">
+                class="site-select">
             <option value="">All</option>
             <option value="legislative" {% if current_type == "legislative" %}selected{% endif %}>Legislative</option>
             <option value="pension" {% if current_type == "pension" %}selected{% endif %}>Revolutionary War Pension</option>
@@ -17,9 +19,9 @@
     </div>
 
     <div>
-        <label for="subject" class="text-sm text-gray-600 mr-1">Subject:</label>
+        <label for="subject" class="font-mono text-[13px] tracking-[0.12em] uppercase text-meta mr-2">Subject</label>
         <select name="subject" id="subject" onchange="this.form.submit()"
-                class="border border-gray-300 rounded px-2 py-1 text-sm bg-white">
+                class="site-select">
             <option value="">All</option>
             {% for subject in subjects %}
             <option value="{{ subject.slug }}" {% if current_subject == subject.slug %}selected{% endif %}>
@@ -30,13 +32,14 @@
     </div>
 </form>
 
-<p class="text-sm text-gray-500 mb-4">
+<p class="font-mono text-[13px] tracking-[0.1em] uppercase text-meta mb-4">
     <span class="font-mono">{{ petitions.count }}</span> petition{{ petitions.count|pluralize }}
 </p>
 
-<table class="w-full text-sm">
+<div class="overflow-x-auto">
+<table class="w-full min-w-[760px] text-[17px]">
     <thead>
-        <tr class="border-b-2 border-gray-800 text-left">
+        <tr class="border-b border-ink text-left font-mono text-[13px] tracking-[0.1em] uppercase">
             <th class="py-2 pr-4">Title</th>
             <th class="py-2 pr-4 w-28">Date</th>
             <th class="py-2 pr-4 w-40">Type</th>
@@ -45,15 +48,17 @@
     </thead>
     <tbody>
         {% for petition in petitions %}
-        <tr class="border-b border-gray-200 hover:bg-gray-100 transition-colors">
+        <tr class="border-b border-rule-light hover:bg-paper-deep transition-colors">
             <td class="py-2 pr-4">
-                <a href="{% url 'petitions:petition_detail' petition.serial %}" class="text-red-800 hover:underline">{{ petition.title }}</a>
+                <a href="{% url 'petitions:petition_detail' petition.serial %}" class="text-accent hover:underline">{{ petition.title }}</a>
             </td>
-            <td class="py-2 pr-4 font-mono text-gray-600">{{ petition.date|default:"—" }}</td>
-            <td class="py-2 pr-4 text-gray-600">{{ petition.get_petition_type_display }}</td>
-            <td class="py-2 text-gray-600">{{ petition.locality_raw|default:"Unknown" }}</td>
+            <td class="py-3 pr-4 font-mono text-meta">{{ petition.date|default:"—" }}</td>
+            <td class="py-3 pr-4 text-ink-soft">{{ petition.get_petition_type_display }}</td>
+            <td class="py-3 text-ink-soft">{{ petition.locality_raw|default:"Unknown" }}</td>
         </tr>
         {% endfor %}
     </tbody>
 </table>
+</div>
+</div>
 {% endblock %}

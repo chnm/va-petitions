@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 # ---------------------------------------------------------------------------
-# "By Petition" / "Laid Before the Assembly" — Django portal image.
+# "Records of Revolution" — Django portal image.
 #
 # Single glibc stage. No Node: django-tailwind 4.x is standalone
 # (pytailwindcss), so the old Volta-built-from-Rust bootstrap is gone.

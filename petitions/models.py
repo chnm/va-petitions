@@ -90,12 +90,3 @@ class Petition(models.Model):
 
     def __str__(self):
         return self.title
-
-    @property
-    def rosetta_url(self):
-        if self.rosetta_ie:
-            return (
-                f"https://rosetta.virginiamemory.com/delivery/"
-                f"DeliveryManagerServlet?dps_pid={self.rosetta_ie}"
-            )
-        return ""

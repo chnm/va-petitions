@@ -1,4 +1,4 @@
-# Virginia Petitions
+# Records of Revolution
 
 A Django web portal for exploring ~3,700 digitized petitions from the Library of Virginia, spanning 1773–1861. The collection includes legislative petitions to the General Assembly and Revolutionary War pension declarations.
 
@@ -7,7 +7,7 @@ A Django web portal for exploring ~3,700 digitized petitions from the Library of
 - Browse petitions by type, subject, county, or date
 - Interactive map with petition counts per county (VA, WV, KY, PA)
 - Toggleable historical county boundaries via the [Atlas of Historical County Boundaries](https://digital.newberry.org/ahcb/) API
-- Links to digitized petition images in the LVA's Rosetta digital repository
+- Links to Library of Virginia online catalog records, which provide access to available digitized materials
 - Django admin for data management
 
 ## Setup

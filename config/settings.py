@@ -78,8 +78,8 @@ IMPORT_EXPORT_USE_TRANSACTIONS = True
 
 # django-unfold admin theme
 UNFOLD = {
-    "SITE_TITLE": "By Petition — Admin",
-    "SITE_HEADER": "By Petition",
+    "SITE_TITLE": "Records of Revolution — Admin",
+    "SITE_HEADER": "Records of Revolution",
     "SITE_SUBHEADER": "Library of Virginia petitions",
 }
 
