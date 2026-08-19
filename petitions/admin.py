@@ -10,16 +10,16 @@ from .models import County, Petition, Subject
 from .resources import PetitionResource
 
 STATE_NAMES = {
-    'VA': 'Virginia',
-    'WV': 'West Virginia',
-    'KY': 'Kentucky',
-    'PA': 'Pennsylvania',
+    "VA": "Virginia",
+    "WV": "West Virginia",
+    "KY": "Kentucky",
+    "PA": "Pennsylvania",
 }
 
 
-@admin.action(description='Geocode selected counties (fill lat/lng via Nominatim)')
+@admin.action(description="Geocode selected counties (fill lat/lng via Nominatim)")
 def geocode_counties(modeladmin, request, queryset):
-    geolocator = Nominatim(user_agent='va-petitions-admin')
+    geolocator = Nominatim(user_agent="va-petitions-admin")
     success, skipped, failed = 0, 0, 0
     for county in queryset:
         if county.latitude is not None and county.longitude is not None:
@@ -32,26 +32,27 @@ def geocode_counties(modeladmin, request, queryset):
             if location:
                 county.latitude = location.latitude
                 county.longitude = location.longitude
-                county.save(update_fields=['latitude', 'longitude'])
+                county.save(update_fields=["latitude", "longitude"])
                 success += 1
             else:
                 failed += 1
-        except Exception:
+        except Exception:  # one county's failure must not abort the batch
             failed += 1
         time.sleep(1.1)  # Nominatim rate limit
     modeladmin.message_user(
         request,
-        f'Geocoded {success}, skipped {skipped} (already have coords), {failed} failed.',
+        f"Geocoded {success}, skipped {skipped} "
+        f"(already have coords), {failed} failed.",
         messages.SUCCESS if not failed else messages.WARNING,
     )
 
 
 @admin.register(County)
 class CountyAdmin(ModelAdmin):
-    list_display = ['name', 'state', 'latitude', 'longitude', 'petition_count']
-    list_filter = ['state']
-    search_fields = ['name']
-    prepopulated_fields = {'slug': ('name',)}
+    list_display = ["name", "state", "latitude", "longitude", "petition_count"]
+    list_filter = ["state"]
+    search_fields = ["name"]
+    prepopulated_fields = {"slug": ("name",)}
     actions = [geocode_counties]
 
     def petition_count(self, obj):
@@ -60,9 +61,9 @@ class CountyAdmin(ModelAdmin):
 
 @admin.register(Subject)
 class SubjectAdmin(ModelAdmin):
-    list_display = ['name', 'petition_count']
-    search_fields = ['name']
-    prepopulated_fields = {'slug': ('name',)}
+    list_display = ["name", "petition_count"]
+    search_fields = ["name"]
+    prepopulated_fields = {"slug": ("name",)}
 
     def petition_count(self, obj):
         return obj.petitions.count()
@@ -73,8 +74,16 @@ class PetitionAdmin(ModelAdmin, ImportExportModelAdmin):
     resource_classes = [PetitionResource]
     import_form_class = ImportForm
     export_form_class = ExportForm
-    list_display = ['serial', 'title', 'petition_type', 'kind', 'primary_theme', 'date', 'locality_raw']
-    list_filter = ['petition_type', 'kind', 'primary_theme', 'subjects']
-    list_editable = ['kind', 'primary_theme']
-    search_fields = ['title', 'description', 'serial']
-    filter_horizontal = ['counties', 'subjects']
+    list_display = [
+        "serial",
+        "title",
+        "petition_type",
+        "kind",
+        "primary_theme",
+        "date",
+        "locality_raw",
+    ]
+    list_filter = ["petition_type", "kind", "primary_theme", "subjects"]
+    list_editable = ["kind", "primary_theme"]
+    search_fields = ["title", "description", "serial"]
+    filter_horizontal = ["counties", "subjects"]

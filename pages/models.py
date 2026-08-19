@@ -1,23 +1,23 @@
 import html
 import re
+from typing import ClassVar
 from urllib.parse import parse_qs, urlparse
 
 import markdown
 from django.db import models
 from django.utils.safestring import mark_safe
 
-
 ROSETTA_ANCHOR_RE = re.compile(
     r'<a href="(?P<url>https?://rosetta\.virginiamemory\.com/'
     r'delivery/DeliveryManagerServlet\?[^\"]+)"(?P<attrs>[^>]*)>'
-    r'(?P<label>.*?)</a>',
+    r"(?P<label>.*?)</a>",
     re.IGNORECASE | re.DOTALL,
 )
 
 
 def _rosetta_identifier(url):
     query = parse_qs(urlparse(html.unescape(url)).query)
-    return query.get('dps_pid', [''])[0]
+    return query.get("dps_pid", [""])[0]
 
 
 class Essay(models.Model):
@@ -74,10 +74,8 @@ class Essay(models.Model):
         # those identifiers through the imported LVA catalog permalinks at
         # render time so database-managed copy cannot expose a brittle URL.
         matches = list(ROSETTA_ANCHOR_RE.finditer(rendered))
-        identifiers = {
-            _rosetta_identifier(match.group('url')) for match in matches
-        }
-        identifiers.discard('')
+        identifiers = {_rosetta_identifier(match.group("url")) for match in matches}
+        identifiers.discard("")
 
         if identifiers:
             from petitions.models import Petition
@@ -85,15 +83,17 @@ class Essay(models.Model):
             permalinks = dict(
                 Petition.objects.filter(
                     rosetta_ie__in=identifiers,
-                ).exclude(permalink='').values_list('rosetta_ie', 'permalink')
+                )
+                .exclude(permalink="")
+                .values_list("rosetta_ie", "permalink")
             )
 
             def catalog_link(match):
-                identifier = _rosetta_identifier(match.group('url'))
+                identifier = _rosetta_identifier(match.group("url"))
                 label = re.sub(
-                    r'Virginia Memory|Rosetta',
-                    'the online catalog',
-                    match.group('label'),
+                    r"Virginia Memory|Rosetta",
+                    "the online catalog",
+                    match.group("label"),
                     flags=re.IGNORECASE,
                 )
                 permalink = permalinks.get(identifier)
@@ -101,7 +101,7 @@ class Essay(models.Model):
                     return label
                 return (
                     f'<a href="{html.escape(permalink, quote=True)}"'
-                    f'{match.group("attrs")}>{label}</a>'
+                    f"{match.group('attrs')}>{label}</a>"
                 )
 
             rendered = ROSETTA_ANCHOR_RE.sub(catalog_link, rendered)
@@ -151,7 +151,9 @@ class Resource(models.Model):
     category = models.CharField(max_length=32, choices=Category.choices)
     title = models.CharField(max_length=200)
     description = models.TextField()
-    url = models.URLField(help_text="Where the resource opens (e.g. on teachinghistory.org).")
+    url = models.URLField(
+        help_text="Where the resource opens (e.g. on teachinghistory.org)."
+    )
     link_label = models.CharField(
         max_length=120,
         blank=True,
@@ -164,7 +166,7 @@ class Resource(models.Model):
     is_published = models.BooleanField(default=True)
 
     class Meta:
-        ordering = ["order", "id"]
+        ordering: ClassVar = ["order", "id"]
 
     def __str__(self):
         return self.title
