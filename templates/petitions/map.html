@@ -6,6 +6,7 @@
 {% block extra_head %}
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/@turf/turf@7/turf.min.js"></script>
 {% endblock %}
 
 {% block content %}
@@ -121,7 +122,7 @@
             <li class="mb-5"><strong class="text-ink">Explore localities.</strong> Larger, darker circles indicate more records. Select a circle or a locality in the right pane to see its records and links to the Library of Virginia online catalog.</li>
             <li class="mb-5"><strong class="text-ink">Refine the records.</strong> Choose a subject or adjust either end of the year range. The map, counts, and locality list update together.</li>
             <li class="mb-5"><strong class="text-ink">Sort the locality list.</strong> The right pane begins with the largest record count. Use the sort menu to arrange localities alphabetically.</li>
-            <li><strong class="text-ink">Compare historical boundaries.</strong> Turn on Historical boundaries to draw county lines for the final year in the selected range. The circles themselves represent the collection&rsquo;s modern locality assignments, so the overlay is a historical reference rather than a one-to-one match.</li>
+            <li><strong class="text-ink">Compare historical boundaries.</strong> Turn on Historical boundaries to draw county lines for the final year in the selected range. Each county is lightly tinted so neighboring counties stay visually distinct &mdash; the color itself carries no meaning beyond that. The circles themselves represent the collection&rsquo;s modern locality assignments, so the overlay is a historical reference rather than a one-to-one match.</li>
         </ol>
         <form method="dialog" class="mt-8 border-t border-rule pt-6">
             <button type="submit" class="font-ui text-[12px] font-medium tracking-[0.08em] uppercase text-paper bg-accent border border-accent cursor-pointer px-4 py-3">Return to the map</button>
@@ -159,6 +160,12 @@ L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
     maxZoom: 19
 }).addTo(map);
 setTimeout(() => map.invalidateSize(), 100);
+
+// Dedicated pane, below the default overlayPane (z-index 400) that record
+// markers live in, so boundary polygons always sit under the markers
+// regardless of which layer was added to the map more recently.
+map.createPane('boundaryPane');
+map.getPane('boundaryPane').style.zIndex = 350;
 
 // One marker per mappable county, indexed to match COUNTIES.
 const markers = COUNTIES.map((c, i) => {
@@ -361,6 +368,74 @@ function deselectLocality() {
 // ---- Historical boundaries ----
 function boundaryYear() { return +yMax.value; }  // snap to the end of the range
 
+// Four (occasionally five, on graphs a strict 4-coloring can't satisfy —
+// e.g. counties that meet only at a corner point) light categorical fills.
+// Color is purely categorical — distinguishes neighbors, not a value scale —
+// so the stroke (not the fill) is the boundary's primary visual cue.
+const BOUNDARY_PALETTE = ['#c7ddd0', '#c9d8e6', '#ead9a0', '#d9c8d6', '#cfc6bb'];
+const BOUNDARY_OUTLINE = '#8a7f6c';
+
+function boundaryFeatureKey(f) {
+    return `${f.properties.state_code}-${f.properties.name}`;
+}
+
+// Two counties are "adjacent" if their (slightly buffered, to absorb
+// simplification gaps between nominally-shared borders) polygons intersect.
+// Bounding-box overlap is checked first to skip the expensive exact test for
+// most pairs.
+function buildBoundaryAdjacency(features) {
+    const buffered = features.map(f => {
+        try { return turf.buffer(f, 0.15, { units: 'kilometers' }); }
+        catch (e) { return f; }
+    });
+    const bboxes = buffered.map(f => turf.bbox(f));
+    const overlaps = (a, b) => a[0] <= b[2] && b[0] <= a[2] && a[1] <= b[3] && b[1] <= a[3];
+
+    const adjacency = features.map(() => new Set());
+    for (let i = 0; i < features.length; i++) {
+        for (let j = i + 1; j < features.length; j++) {
+            if (!overlaps(bboxes[i], bboxes[j])) continue;
+            if (turf.booleanIntersects(buffered[i], buffered[j])) {
+                adjacency[i].add(j);
+                adjacency[j].add(i);
+            }
+        }
+    }
+    return adjacency;
+}
+
+// DSATUR: repeatedly color the uncolored county with the most distinct
+// colors already among its neighbors (breaking ties by neighbor count, then
+// a stable name key), which reliably finds a 4-coloring for graphs like this
+// — a fixed iteration order (e.g. alphabetical greedy) commonly does not.
+function colorBoundaries(features, adjacency) {
+    const n = features.length;
+    const color = new Array(n).fill(-1);
+    const neighborColors = Array.from({ length: n }, () => new Set());
+    const degree = adjacency.map(s => s.size);
+    const keys = features.map(boundaryFeatureKey);
+    const uncolored = new Set(Array.from({ length: n }, (_, i) => i));
+
+    while (uncolored.size) {
+        let best = -1;
+        for (const i of uncolored) {
+            if (best === -1 || neighborColors[i].size > neighborColors[best].size ||
+                (neighborColors[i].size === neighborColors[best].size &&
+                    (degree[i] > degree[best] || (degree[i] === degree[best] && keys[i] < keys[best])))) {
+                best = i;
+            }
+        }
+        const used = new Set();
+        for (const j of adjacency[best]) if (color[j] >= 0) used.add(color[j]);
+        let c = 0;
+        while (used.has(c)) c++;
+        color[best] = c % BOUNDARY_PALETTE.length;
+        uncolored.delete(best);
+        for (const j of adjacency[best]) neighborColors[j].add(color[best]);
+    }
+    return color;
+}
+
 function fetchBoundaries(year) {
     if (boundaryLayer) { map.removeLayer(boundaryLayer); boundaryLayer = null; }
     const dateStr = year + '-01-01';
@@ -368,9 +443,19 @@ function fetchBoundaries(year) {
         .then(r => r.json())
         .then(data => {
             if (!boundariesOn) return;
+            const adjacency = buildBoundaryAdjacency(data.features);
+            const colorIndex = colorBoundaries(data.features, adjacency);
+            const featureColor = new Map(data.features.map((f, i) => [f, colorIndex[i]]));
             boundaryLayer = L.geoJSON(data, {
+                pane: 'boundaryPane',
                 interactive: false,  // decorative only — let clicks fall through to markers
-                style: { color: '#7c6a4f', weight: 1.5, fillOpacity: 0, dashArray: '5,5' }
+                style: (feature) => ({
+                    color: BOUNDARY_OUTLINE,
+                    weight: 1.2,
+                    opacity: 0.85,
+                    fillColor: BOUNDARY_PALETTE[featureColor.get(feature)],
+                    fillOpacity: 0.35
+                })
             }).addTo(map);
         })
         .catch(e => console.error('AHCB fetch error:', e));
