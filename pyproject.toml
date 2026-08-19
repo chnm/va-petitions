@@ -16,3 +16,16 @@ dependencies = [
     "python-dotenv>=1.0.1",
     "whitenoise>=6.6.0",
 ]
+
+[tool.ruff.lint]
+select = ["DJ", "E", "F", "W", "I", "UP", "B", "RUF"]
+
+[tool.ruff.lint.per-file-ignores]
+# Django-generated migrations trip RUF012 (mutable class attr) on their
+# standard dependencies/operations lists; not worth annotating generated code.
+"**/migrations/*.py" = ["RUF012", "E501"]
+# ModelAdmin config (list_display, list_filter, etc.) is always class-level
+# by Django's own contract; annotating each one is noise, not a real fix.
+"**/admin.py" = ["RUF012"]
+# Django's stock AUTH_PASSWORD_VALIDATORS dotted paths can't be wrapped.
+"**/settings.py" = ["E501"]

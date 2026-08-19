@@ -97,9 +97,8 @@ def unseed(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('pages', '0003_resource_resourcepage'),
+        ("pages", "0003_resource_resourcepage"),
     ]
 
     operations = [
