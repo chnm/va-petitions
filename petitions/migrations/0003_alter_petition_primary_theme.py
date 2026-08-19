@@ -4,15 +4,26 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('petitions', '0002_add_kind_and_primary_theme'),
+        ("petitions", "0002_add_kind_and_primary_theme"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='petition',
-            name='primary_theme',
-            field=models.CharField(blank=True, choices=[('property', 'Property & commerce'), ('restrict', 'Restriction & repeal'), ('capital', 'Capital case & loss'), ('freedom', 'Freedom & manumission'), ('estate', 'Estate & property'), ('war', 'Wartime loss')], help_text='Thematic classification for petitions', max_length=20),
+            model_name="petition",
+            name="primary_theme",
+            field=models.CharField(
+                blank=True,
+                choices=[
+                    ("property", "Property & commerce"),
+                    ("restrict", "Restriction & repeal"),
+                    ("capital", "Capital case & loss"),
+                    ("freedom", "Freedom & manumission"),
+                    ("estate", "Estate & property"),
+                    ("war", "Wartime loss"),
+                ],
+                help_text="Thematic classification for petitions",
+                max_length=20,
+            ),
         ),
     ]

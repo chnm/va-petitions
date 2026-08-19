@@ -1,8 +1,10 @@
+from typing import ClassVar
+
 from django.db import models
 
 
 class County(models.Model):
-    STATE_CHOICES = [
+    STATE_CHOICES: ClassVar = [
         ("VA", "Virginia"),
         ("WV", "West Virginia"),
         ("KY", "Kentucky"),
@@ -17,7 +19,7 @@ class County(models.Model):
 
     class Meta:
         verbose_name_plural = "counties"
-        ordering = ["state", "name"]
+        ordering: ClassVar = ["state", "name"]
 
     def __str__(self):
         return f"{self.name}, {self.get_state_display()}"
@@ -28,25 +30,25 @@ class Subject(models.Model):
     slug = models.SlugField(max_length=200, unique=True)
 
     class Meta:
-        ordering = ["name"]
+        ordering: ClassVar = ["name"]
 
     def __str__(self):
         return self.name
 
 
 class Petition(models.Model):
-    PETITION_TYPES = [
+    PETITION_TYPES: ClassVar = [
         ("legislative", "Legislative petition"),
         ("pension", "Declaration for Revolutionary War pension"),
     ]
 
-    KIND_CHOICES = [
+    KIND_CHOICES: ClassVar = [
         ("Petition", "Petition"),
         ("Remonstrance", "Remonstrance"),
         ("Counter-Petition", "Counter-Petition"),
     ]
 
-    THEME_CHOICES = [
+    THEME_CHOICES: ClassVar = [
         ("property", "Property & commerce"),
         ("restrict", "Restriction & repeal"),
         ("capital", "Capital case & loss"),
@@ -86,7 +88,7 @@ class Petition(models.Model):
     subjects = models.ManyToManyField(Subject, blank=True, related_name="petitions")
 
     class Meta:
-        ordering = ["date", "serial"]
+        ordering: ClassVar = ["date", "serial"]
 
     def __str__(self):
         return self.title

@@ -39,7 +39,7 @@
         <div class="max-w-[1440px] mx-auto flex flex-col lg:flex-row lg:justify-between lg:items-center gap-6 lg:gap-10 py-6 sm:py-[30px] px-6 sm:px-10 lg:px-14">
             <a href="{% url 'pages:home' %}">
                 <div class="flex items-center gap-4">
-                    <div class="font-display text-[30px] sm:text-[34px] leading-none tracking-[-0.015em] text-ink">Records of <span style="color: #7c3a2d;">Revolution</span></div>
+                    <div class="font-display text-[30px] sm:text-[34px] leading-none tracking-[-0.015em] text-ink">Records of Revolution</div>
                 </div>
             </a>
             <nav aria-label="Primary navigation" class="flex flex-wrap gap-x-5 gap-y-3 sm:gap-x-8 font-ui text-[13px] font-medium tracking-[0.08em] uppercase text-ink-soft">
@@ -85,6 +85,47 @@
     </footer>
 
     </div>
+
+    <button
+        type="button"
+        id="back-to-top"
+        aria-label="Back to top"
+        aria-hidden="true"
+        tabindex="-1"
+        class="fixed bottom-6 right-6 z-40 flex h-11 w-11 items-center justify-center rounded-full bg-blue text-paper shadow-lg opacity-0 pointer-events-none transition-opacity duration-300 hover:bg-ink"
+    >
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+            <path d="M9 14V3M9 3L4 8M9 3l5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+    </button>
+
+    <script>
+    (function () {
+        var btn = document.getElementById('back-to-top');
+        var visible = false;
+
+        function setVisible(next) {
+            if (next === visible) return;
+            visible = next;
+            btn.classList.toggle('opacity-0', !visible);
+            btn.classList.toggle('pointer-events-none', !visible);
+            btn.setAttribute('aria-hidden', String(!visible));
+            btn.setAttribute('tabindex', visible ? '0' : '-1');
+        }
+
+        document.addEventListener('scroll', function () {
+            setVisible(window.scrollY > 400);
+        }, { passive: true });
+
+        btn.addEventListener('click', function () {
+            window.scrollTo({
+                top: 0,
+                behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'
+            });
+        });
+    })();
+    </script>
+
     {% block extra_js %}{% endblock %}
 </body>
 </html>

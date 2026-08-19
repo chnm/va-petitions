@@ -59,7 +59,7 @@
 .home-hero {
     position: relative;
     isolation: isolate;
-    min-height: clamp(680px, 84vh, 720px);
+    min-height: clamp(540px, 64vh, 580px);
     overflow: hidden;
     background: var(--color-blue-deep);
 }
@@ -105,8 +105,8 @@
 .home-hero__content {
     position: relative;
     z-index: 3;
-    min-height: clamp(680px, 84vh, 720px);
-    padding-top: clamp(18rem, 56vw, 24rem);
+    min-height: clamp(540px, 64vh, 580px);
+    padding-top: clamp(14.5rem, 45vw, 19.5rem);
     padding-bottom: 3rem;
 }
 
@@ -116,7 +116,7 @@
 
 @media (min-width: 64rem) {
     .home-hero {
-        min-height: clamp(580px, 68vh, 640px);
+        min-height: clamp(460px, 54vh, 520px);
     }
 
     .home-hero__image {
@@ -141,7 +141,7 @@
     .home-hero__content {
         display: flex;
         align-items: center;
-        min-height: clamp(580px, 68vh, 640px);
+        min-height: clamp(460px, 54vh, 520px);
         padding-top: 4.5rem;
         padding-bottom: 4.5rem;
     }
