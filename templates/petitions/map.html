@@ -378,11 +378,14 @@ function deselectLocality() {
 // ---- Historical boundaries ----
 function boundaryYear() { return +yMax.value; }  // snap to the end of the range
 
-// Four (occasionally five, on graphs a strict 4-coloring can't satisfy —
-// e.g. counties that meet only at a corner point) light categorical fills.
+// Light/dark tint pairs of the theme's own blue and ochre accents (its only
+// two accents not already claimed by the record markers, which use rust) —
+// two hue families x two lightness steps, rather than four unrelated hues.
+// Occasionally a fifth (a neutral paper tone) is needed, on graphs a strict
+// 4-coloring can't satisfy — e.g. counties that meet only at a corner point.
 // Color is purely categorical — distinguishes neighbors, not a value scale —
 // so the stroke (not the fill) is the boundary's primary visual cue.
-const BOUNDARY_PALETTE = ['#c7ddd0', '#c9d8e6', '#ead9a0', '#d9c8d6', '#cfc6bb'];
+const BOUNDARY_PALETTE = ['#d6e0eb', '#a3bdd6', '#ede2cf', '#d9c5a1', '#e4dcc8'];
 const BOUNDARY_OUTLINE = '#8a7f6c';
 
 function boundaryFeatureKey(f) {
