@@ -256,6 +256,28 @@
     background: rgba(27, 43, 58, 0.68);
 }
 
+/* ---- Historical county boundary labels ----
+   Deliberately distinct from CARTO's own gray sans-serif place labels:
+   small mono caps with a paper-colored halo for contrast over both the
+   boundary fills and the basemap. */
+.boundary-label-icon {
+    background: none;
+    border: none;
+}
+
+.boundary-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--color-ink-soft-2);
+    text-shadow:
+        0 0 3px var(--color-paper), 0 0 3px var(--color-paper),
+        0 0 3px var(--color-paper), 0 0 3px var(--color-paper);
+    white-space: nowrap;
+}
+
 /* ---- Essay body (Markdown-rendered prose on the Introduction page) ---- */
 .essay-body {
     font-family: var(--font-serif);
