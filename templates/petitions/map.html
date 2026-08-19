@@ -122,7 +122,7 @@
             <li class="mb-5"><strong class="text-ink">Explore localities.</strong> Larger, darker circles indicate more records. Select a circle or a locality in the right pane to see its records and links to the Library of Virginia online catalog.</li>
             <li class="mb-5"><strong class="text-ink">Refine the records.</strong> Choose a subject or adjust either end of the year range. The map, counts, and locality list update together.</li>
             <li class="mb-5"><strong class="text-ink">Sort the locality list.</strong> The right pane begins with the largest record count. Use the sort menu to arrange localities alphabetically.</li>
-            <li><strong class="text-ink">Compare historical boundaries.</strong> Turn on Historical boundaries to draw county lines for the final year in the selected range. Each county is lightly tinted so neighboring counties stay visually distinct &mdash; the color itself carries no meaning beyond that. The circles themselves represent the collection&rsquo;s modern locality assignments, so the overlay is a historical reference rather than a one-to-one match.</li>
+            <li><strong class="text-ink">Compare historical boundaries.</strong> Turn on Historical boundaries to draw county lines for the final year in the selected range. Each county is lightly tinted so neighboring counties stay visually distinct &mdash; the color itself carries no meaning beyond that. County names appear as you zoom in, starting with the largest counties first. The circles themselves represent the collection&rsquo;s modern locality assignments, so the overlay is a historical reference rather than a one-to-one match.</li>
         </ol>
         <form method="dialog" class="mt-8 border-t border-rule pt-6">
             <button type="submit" class="font-ui text-[12px] font-medium tracking-[0.08em] uppercase text-paper bg-accent border border-accent cursor-pointer px-4 py-3">Return to the map</button>
@@ -148,6 +148,8 @@ COUNTIES.forEach((c, i) => { SLUG_INDEX[c.slug] = i; });
 
 let boundariesOn = false;
 let boundaryLayer = null;
+let boundaryLabelGroup = null;
+let labelCandidates = [];      // current year's counties, sorted by area desc
 let selectedCounty = null;     // slug
 let boundaryTimeout = null;
 let currentCounts = [];        // counts per county index, current filter
@@ -161,11 +163,14 @@ L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
 }).addTo(map);
 setTimeout(() => map.invalidateSize(), 100);
 
-// Dedicated pane, below the default overlayPane (z-index 400) that record
-// markers live in, so boundary polygons always sit under the markers
-// regardless of which layer was added to the map more recently.
+// Dedicated panes, below the default overlayPane (z-index 400) that record
+// markers live in, so boundary polygons and their labels always sit under
+// the markers regardless of which layer was added to the map more recently.
 map.createPane('boundaryPane');
 map.getPane('boundaryPane').style.zIndex = 350;
+map.createPane('labelPane');
+map.getPane('labelPane').style.zIndex = 375;
+map.getPane('labelPane').style.pointerEvents = 'none';
 
 // One marker per mappable county, indexed to match COUNTIES.
 const markers = COUNTIES.map((c, i) => {
@@ -436,6 +441,89 @@ function colorBoundaries(features, adjacency) {
     return color;
 }
 
+// The AHCB feed returns e.g. "ELIZABETH CITY (EXT)" or "FAIRFAX - VA PART" —
+// title-case the name and reformat the county's own (ext)/state-part
+// qualifiers into a more readable trailing parenthetical.
+function normalizeCountyLabel(rawName) {
+    let name = rawName.trim();
+    let suffix = '';
+    const extMatch = name.match(/\s*\(ext\)\s*$/i);
+    const partMatch = name.match(/\s*-\s*([A-Za-z]{2})\s*part\s*$/i);
+    if (extMatch) {
+        name = name.slice(0, extMatch.index).trim();
+        suffix = ' (ext.)';
+    } else if (partMatch) {
+        name = name.slice(0, partMatch.index).trim();
+        suffix = ` (${partMatch[1].toUpperCase()} part)`;
+    }
+    const titled = name.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase());
+    return titled + suffix;
+}
+
+// A guaranteed-inside-the-polygon anchor point per county (unlike a plain
+// centroid, which can fall outside on crescent/concave shapes), sorted by
+// area so larger counties get priority in both zoom-tiering and collisions.
+function buildLabelCandidates(features) {
+    return features
+        .map((f) => {
+            const [lng, lat] = turf.pointOnFeature(f).geometry.coordinates;
+            return {
+                latlng: [lat, lng],
+                text: normalizeCountyLabel(f.properties.name),
+                area: f.properties.area_sqmi || 0
+            };
+        })
+        .sort((a, b) => b.area - a.area);
+}
+
+// Zoom-tiered, collision-avoided label layer. Candidates are already
+// priority-sorted (largest county first); at each zoom tier we render a
+// widening subset, measure their actual rendered boxes in one batched read
+// pass, then hide any label that overlaps an already-accepted (higher
+// priority) one in a second batched write pass — avoids layout thrashing
+// from interleaving reads and writes across ~300 elements.
+function renderLabels() {
+    if (boundaryLabelGroup) { map.removeLayer(boundaryLabelGroup); boundaryLabelGroup = null; }
+    if (!boundariesOn || !labelCandidates.length) return;
+
+    const zoom = map.getZoom();
+    if (zoom < 8) return;  // default regional view: no labels
+    const tierFraction = zoom < 10 ? 0.4 : 1;  // mid zoom: largest counties only
+    const tierCount = Math.ceil(labelCandidates.length * tierFraction);
+    const tier = labelCandidates.slice(0, tierCount);
+
+    boundaryLabelGroup = L.layerGroup().addTo(map);
+    const markers = tier.map(({ latlng, text }) => {
+        const marker = L.marker(latlng, {
+            pane: 'labelPane',
+            interactive: false,
+            keyboard: false,
+            icon: L.divIcon({ className: 'boundary-label-icon', html: `<span class="boundary-label">${esc(text)}</span>` })
+        });
+        marker.addTo(boundaryLabelGroup);
+        return marker;
+    });
+
+    // Read phase: measure every rendered label before hiding any of them.
+    const rects = markers.map((m) => m.getElement().getBoundingClientRect());
+
+    // Write phase: keep a label only if it doesn't overlap an
+    // already-accepted (higher-priority, since `tier` is priority-sorted)
+    // one.
+    const accepted = [];
+    markers.forEach((marker, i) => {
+        const r = rects[i];
+        const overlaps = accepted.some((a) =>
+            r.left < a.right && r.right > a.left && r.top < a.bottom && r.bottom > a.top
+        );
+        if (overlaps) {
+            boundaryLabelGroup.removeLayer(marker);
+        } else {
+            accepted.push(r);
+        }
+    });
+}
+
 function fetchBoundaries(year) {
     if (boundaryLayer) { map.removeLayer(boundaryLayer); boundaryLayer = null; }
     const dateStr = year + '-01-01';
@@ -457,6 +545,8 @@ function fetchBoundaries(year) {
                     fillOpacity: 0.35
                 })
             }).addTo(map);
+            labelCandidates = buildLabelCandidates(data.features);
+            renderLabels();
         })
         .catch(e => console.error('AHCB fetch error:', e));
 }
@@ -465,11 +555,14 @@ document.getElementById('boundary-check').addEventListener('change', function ()
     boundariesOn = this.checked;
     if (boundariesOn) {
         fetchBoundaries(boundaryYear());
-    } else if (boundaryLayer) {
-        map.removeLayer(boundaryLayer);
-        boundaryLayer = null;
+    } else {
+        if (boundaryLayer) { map.removeLayer(boundaryLayer); boundaryLayer = null; }
+        if (boundaryLabelGroup) { map.removeLayer(boundaryLabelGroup); boundaryLabelGroup = null; }
+        labelCandidates = [];
     }
 });
+
+map.on('zoomend', () => { if (boundariesOn) renderLabels(); });
 
 // ---- Events ----
 subjectSelect.addEventListener('change', applyFilters);
